@@ -3,6 +3,8 @@
 import Image from 'next/image';
 import { useState } from 'react';
 
+import { type Product } from '@bite/contracts';
+
 import { useProductQuery } from '@/entities/product';
 import { AddToCartButton } from '@/features/cart';
 import { BackToCatalogLink } from '@/features/catalog';
@@ -14,10 +16,14 @@ import { StatusPanel } from '@/shared/ui/status-panel';
 import styles from './ProductDetails.module.scss';
 
 type ProductDetailsProps = Readonly<{
+  initialProduct: Product | undefined;
   productId: string;
 }>;
 
-export function ProductDetails({ productId }: ProductDetailsProps) {
+export function ProductDetails({
+  initialProduct,
+  productId,
+}: ProductDetailsProps) {
   const [imageFailed, setImageFailed] = useState(false);
   const {
     data: product,
@@ -25,7 +31,7 @@ export function ProductDetails({ productId }: ProductDetailsProps) {
     isError,
     isPending,
     refetch,
-  } = useProductQuery(productId);
+  } = useProductQuery(productId, initialProduct);
 
   if (isPending) {
     return (

@@ -201,11 +201,13 @@ Customer routes:
 | `/cart`                 | Review, update, and complete the order.   |
 | `/orders/{orderId}`     | View the completed order in this browser. |
 
-The home route fetches the catalog in a request-time Server Component, includes
-the products in the initial HTML, and passes that data into TanStack Query as
-fresh initial data. This avoids an immediate duplicate browser request while
-preserving client-side caching, retries, and error handling. API responses are
-validated against the shared Zod contracts before rendering.
+The home and product-detail routes fetch catalog data in request-time Server
+Components, include it in the initial HTML, and pass it into TanStack Query as
+fresh initial data. This avoids immediate duplicate browser requests while
+preserving client-side caching, retries, and error handling. Confirmed missing
+products use the Next.js not-found response; transient API failures retain the
+client retry experience. API responses are validated against the shared Zod
+contracts before rendering.
 
 Cart state is stored in the browser under the versioned `bite.cart.v1` key. Each
 add action creates a new cart line—even for the same product—while decrement,

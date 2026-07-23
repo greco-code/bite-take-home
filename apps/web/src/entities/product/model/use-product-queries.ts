@@ -13,5 +13,11 @@ export const useProductsQuery = (initialData: Product[] | undefined) =>
     initialData: () => initialData,
   });
 
-export const useProductQuery = (productId: string) =>
-  useQuery(productQueryOptions(productId));
+export const useProductQuery = (
+  productId: string,
+  initialData: Product | undefined,
+) =>
+  useQuery({
+    ...productQueryOptions(productId),
+    initialData: () => initialData,
+  });
