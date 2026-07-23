@@ -1,8 +1,15 @@
+'use client';
+
 import Link from 'next/link';
+
+import { useCart } from '@/entities/cart';
 
 import styles from './SiteHeader.module.scss';
 
 export function SiteHeader() {
+  const { itemCount } = useCart();
+  const itemLabel = `${itemCount} ${itemCount === 1 ? 'item' : 'items'}`;
+
   return (
     <>
       <a className={styles.skipLink} href="#main-content">
@@ -16,7 +23,19 @@ export function SiteHeader() {
             </span>
             <span>Bite</span>
           </Link>
-          <p className={styles.tagline}>Simple food. Good mood.</p>
+          <div className={styles.actions}>
+            <p className={styles.tagline}>Simple food. Good mood.</p>
+            <Link className={styles.cartLink} href="/cart">
+              Cart
+              <span
+                className={styles.cartCount}
+                aria-label={itemLabel}
+                aria-live="polite"
+              >
+                {itemCount}
+              </span>
+            </Link>
+          </div>
         </div>
       </header>
     </>

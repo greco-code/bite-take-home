@@ -4,10 +4,10 @@ Bite is a full-stack ordering application built as a pnpm monorepo. The project
 contains a Next.js customer application, an Express API, and a shared package for
 runtime validation and API contracts.
 
-> Project status: the workspace, responsive product catalog, product details,
-> PostgreSQL catalog persistence, API, and API documentation are ready. Cart,
-> checkout, order persistence, and deployment will be implemented in subsequent
-> milestones.
+> Project status: the workspace, responsive product catalog and details,
+> persistent anonymous cart, PostgreSQL catalog persistence, API, and API
+> documentation are ready. Checkout, order persistence, and deployment will be
+> implemented in subsequent milestones.
 
 ## Repository structure
 
@@ -187,13 +187,23 @@ Catalog endpoints:
 
 Customer routes:
 
-| Path                    | Purpose                         |
-| ----------------------- | ------------------------------- |
-| `/`                     | Browse the responsive menu.     |
-| `/products/{productId}` | View one product and its price. |
+| Path                    | Purpose                                   |
+| ----------------------- | ----------------------------------------- |
+| `/`                     | Browse the responsive menu and add items. |
+| `/products/{productId}` | View one product and add it to the cart.  |
+| `/cart`                 | Review and update the anonymous cart.     |
 
-The customer application uses TanStack Query for catalog server-state and
-validates API responses against the shared Zod contracts before rendering them.
+The home route fetches the catalog in a request-time Server Component, includes
+the products in the initial HTML, and passes that data into TanStack Query as
+fresh initial data. This avoids an immediate duplicate browser request while
+preserving client-side caching, retries, and error handling. API responses are
+validated against the shared Zod contracts before rendering.
+
+Cart state is stored in the browser under the versioned `bite.cart.v1` key. Each
+add action creates a new cart line—even for the same product—while decrement,
+increment, and remove actions target one line at a time. Stored product data is
+a display snapshot only; checkout will re-read product availability and
+authoritative prices from the API before creating an order.
 
 The OpenAPI 3.1 document is generated from the shared Zod contracts rather than
 maintained separately. Swagger UI renders that document and can execute requests
@@ -247,8 +257,9 @@ pnpm --filter @bite/contracts test
 ```
 
 The API test suite covers health, catalog responses and errors, CORS, the
-OpenAPI document, and Swagger UI. Frontend tests cover catalog response
-validation, encoded product URLs, API errors, and price formatting.
+OpenAPI document, and Swagger UI. Frontend tests cover cart behavior and storage
+validation, catalog response validation, encoded product URLs, API errors, and
+price formatting.
 
 ## Troubleshooting
 

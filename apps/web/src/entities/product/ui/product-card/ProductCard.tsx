@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 
 import { type Product } from '@bite/contracts';
 
@@ -11,18 +11,21 @@ import { formatPrice } from '@/shared/lib/format-price';
 import styles from './ProductCard.module.scss';
 
 type ProductCardProps = Readonly<{
+  action?: ReactNode;
+  onNavigate: () => void;
   product: Product;
 }>;
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ action, onNavigate, product }: ProductCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
 
   return (
     <article className={styles.card}>
       <Link
-        className={styles.link}
+        className={styles.imageLink}
         href={`/products/${encodeURIComponent(product.id)}`}
         aria-label={`View ${product.name}`}
+        onNavigate={onNavigate}
       >
         <div className={styles.imageWrap}>
           {imageFailed ? (
@@ -39,14 +42,27 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
           <span className={styles.price}>{formatPrice(product.price)}</span>
         </div>
-        <div className={styles.content}>
+      </Link>
+      <div className={styles.content}>
+        <Link
+          className={styles.detailsLink}
+          href={`/products/${encodeURIComponent(product.id)}`}
+          onNavigate={onNavigate}
+        >
           <h2 className={styles.name}>{product.name}</h2>
           <p className={styles.description}>{product.description}</p>
-          <span className={styles.action} aria-hidden="true">
-            View item <span>→</span>
-          </span>
+        </Link>
+        <div className={styles.actions}>
+          <Link
+            className={styles.viewAction}
+            href={`/products/${encodeURIComponent(product.id)}`}
+            onNavigate={onNavigate}
+          >
+            View item <span aria-hidden="true">→</span>
+          </Link>
+          {action}
         </div>
-      </Link>
+      </div>
     </article>
   );
 }

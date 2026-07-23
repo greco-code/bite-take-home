@@ -1,20 +1,34 @@
 'use client';
 
+import { useEffect } from 'react';
+
+import { type Product } from '@bite/contracts';
+
 import { ProductCard, useProductsQuery } from '@/entities/product';
+import { AddToCartButton } from '@/features/cart';
+import { clearCatalogOrigin, markCatalogOrigin } from '@/features/catalog';
 import { StatusPanel } from '@/shared/ui/status-panel';
 
 import styles from './ProductCatalog.module.scss';
 
 const skeletonItems = Array.from({ length: 6 }, (_, index) => index);
 
-export function ProductCatalog() {
+type ProductCatalogProps = Readonly<{
+  initialProducts: Product[] | undefined;
+}>;
+
+export function ProductCatalog({ initialProducts }: ProductCatalogProps) {
   const {
     data: products,
     isError,
     isFetching,
     isPending,
     refetch,
-  } = useProductsQuery();
+  } = useProductsQuery(initialProducts);
+
+  useEffect(() => {
+    clearCatalogOrigin();
+  }, []);
 
   return (
     <main className={styles.main} id="main-content">
@@ -77,7 +91,12 @@ export function ProductCatalog() {
           </div>
           <div className={styles.grid}>
             {products.map((product) => (
-              <ProductCard product={product} key={product.id} />
+              <ProductCard
+                action={<AddToCartButton product={product} />}
+                onNavigate={markCatalogOrigin}
+                product={product}
+                key={product.id}
+              />
             ))}
           </div>
         </section>

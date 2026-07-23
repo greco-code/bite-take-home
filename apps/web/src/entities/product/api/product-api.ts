@@ -6,15 +6,15 @@ import {
 
 import { apiRequest } from '@/shared/api';
 
-export const fetchProducts = (signal?: AbortSignal): Promise<Product[]> =>
-  apiRequest('/v1/products', productListResponseSchema, signal);
+export const fetchProducts = (options?: RequestInit): Promise<Product[]> =>
+  apiRequest('/v1/products', productListResponseSchema, options);
 
 export const fetchProduct = (
   productId: string,
-  signal?: AbortSignal,
+  options?: RequestInit,
 ): Promise<Product> =>
   apiRequest(
     `/v1/products/${encodeURIComponent(productId)}`,
     productSchema,
-    signal,
+    options,
   );

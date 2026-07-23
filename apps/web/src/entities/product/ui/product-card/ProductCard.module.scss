@@ -1,6 +1,8 @@
 .card {
+  display: grid;
   min-width: 0;
   overflow: hidden;
+  grid-template-rows: auto 1fr;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -17,10 +19,8 @@
   }
 }
 
-.link {
-  display: grid;
-  height: 100%;
-  grid-template-rows: auto 1fr;
+.imageLink {
+  display: block;
 }
 
 .imageWrap {
@@ -79,6 +79,10 @@
   padding: 1.4rem;
 }
 
+.detailsLink {
+  display: block;
+}
+
 .name {
   margin: 0;
   font-size: 1.2rem;
@@ -96,11 +100,18 @@
   -webkit-line-clamp: 3;
 }
 
-.action {
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.viewAction {
   display: inline-flex;
   gap: 0.4rem;
   align-items: center;
-  margin-top: auto;
   color: var(--color-accent);
   font-size: 0.9rem;
   font-weight: 800;
@@ -109,7 +120,7 @@
     transition: transform 180ms ease;
   }
 
-  .card:hover & span {
+  &:hover span {
     transform: translateX(0.2rem);
   }
 }

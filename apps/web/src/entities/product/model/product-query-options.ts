@@ -9,11 +9,11 @@ export const productQueryKeys = {
 
 export const productListQueryOptions = queryOptions({
   queryKey: productQueryKeys.all,
-  queryFn: ({ signal }) => fetchProducts(signal),
+  queryFn: ({ signal }) => fetchProducts({ signal }),
 });
 
 export const productQueryOptions = (productId: string) =>
   queryOptions({
     queryKey: productQueryKeys.detail(productId),
-    queryFn: ({ signal }) => fetchProduct(productId, signal),
+    queryFn: ({ signal }) => fetchProduct(productId, { signal }),
   });

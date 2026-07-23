@@ -32,7 +32,7 @@ describe('catalog API client', () => {
     await expect(fetchProducts()).resolves.toEqual([product]);
     expect(fetchMock).toHaveBeenCalledWith(
       'http://localhost:4000/v1/products',
-      { signal: null },
+      undefined,
     );
   });
 
@@ -50,7 +50,25 @@ describe('catalog API client', () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       'http://localhost:4000/v1/products/special%2Fitem',
-      { signal: null },
+      undefined,
+    );
+  });
+
+  it('forwards request options for server-side fetching', async () => {
+    vi.stubEnv('NEXT_PUBLIC_API_URL', 'http://localhost:4000');
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([product]), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await fetchProducts({ cache: 'no-store' });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://localhost:4000/v1/products',
+      { cache: 'no-store' },
     );
   });
 

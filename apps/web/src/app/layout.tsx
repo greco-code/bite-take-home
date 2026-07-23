@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
 import { QueryProvider } from '@/app/providers/query-provider';
+import { CartProvider } from '@/entities/cart';
 import { SiteHeader } from '@/widgets/site-header';
 
 import './globals.scss';
@@ -23,8 +24,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html lang="en">
       <body>
         <QueryProvider>
-          <SiteHeader />
-          {children}
+          <CartProvider>
+            <SiteHeader />
+            {children}
+          </CartProvider>
         </QueryProvider>
       </body>
     </html>

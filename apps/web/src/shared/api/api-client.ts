@@ -27,11 +27,9 @@ export class ApiError extends Error {
 export const apiRequest = async <T>(
   path: string,
   schema: ResponseSchema<T>,
-  signal?: AbortSignal,
+  options?: RequestInit,
 ): Promise<T> => {
-  const response = await fetch(`${getApiBaseUrl()}${path}`, {
-    signal: signal ?? null,
-  });
+  const response = await fetch(`${getApiBaseUrl()}${path}`, options);
   const payload: unknown = await response.json();
 
   if (!response.ok) {

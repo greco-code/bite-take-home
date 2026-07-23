@@ -1,0 +1,15 @@
+.link {
+  display: inline-flex;
+  margin: 0 0 1.5rem;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  font-weight: 750;
+  transition:
+    color 160ms ease,
+    transform 160ms ease;
+
+  &:hover {
+    color: var(--color-accent);
+    transform: translateX(-0.15rem);
+  }
+}

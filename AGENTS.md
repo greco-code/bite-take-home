@@ -40,11 +40,16 @@
 - Use SCSS Modules for page, widget, feature, and entity composition.
 - Keep each reusable UI component in its own folder with its `.tsx`,
   `.module.scss`, and component-specific tests or stories when present.
+- Keep one React component per component file. Extract nested or secondary
+  components into their own co-located component folder; small types, hooks,
+  and non-component helpers may remain when they are private to the file.
 - Keep Next.js special route files (`page.tsx`, `layout.tsx`, `loading.tsx`, and
   similar files) in their route segment as required by the framework. Keep them
   thin and extract reusable or styled UI into co-located component folders.
-- Expose each FSD slice through a focused `index.ts` public API; avoid
-  application-wide barrels that mix unrelated slices.
+- Import across FSD slices only through the target slice's root `index.ts`.
+  Root public APIs may delegate with `export *` to focused `api`, `model`, and
+  `ui` segment indexes; segment indexes must keep implementation-only modules
+  private. Avoid application-wide barrels that mix unrelated slices.
 - Keep reusable TanStack Query hooks separate from their query-key and
   query-options definitions.
 - SCSS must consume shared CSS custom properties rather than duplicating design-token values.
