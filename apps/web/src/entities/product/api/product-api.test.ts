@@ -93,7 +93,7 @@ describe('catalog API client', () => {
     );
 
     await expect(fetchProduct('missing')).rejects.toEqual(
-      new ApiError('Product not found.', 404),
+      new ApiError('Product not found.', 404, 'PRODUCT_NOT_FOUND'),
     );
   });
 
@@ -110,5 +110,39 @@ describe('catalog API client', () => {
     );
 
     await expect(fetchProducts()).rejects.toThrow();
+  });
+
+  it('turns connectivity failures into a customer-safe typed error', async () => {
+    vi.stubEnv('NEXT_PUBLIC_API_URL', 'http://localhost:4000');
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Offline')));
+
+    await expect(fetchProducts()).rejects.toEqual(
+      new ApiError(
+        'We could not reach the server. Check your connection and try again.',
+        0,
+        'NETWORK_ERROR',
+      ),
+    );
+  });
+
+  it('turns non-JSON server failures into a customer-safe typed error', async () => {
+    vi.stubEnv('NEXT_PUBLIC_API_URL', 'http://localhost:4000');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response('Bad gateway', {
+          status: 502,
+          headers: { 'Content-Type': 'text/plain' },
+        }),
+      ),
+    );
+
+    await expect(fetchProducts()).rejects.toEqual(
+      new ApiError(
+        'The request could not be completed.',
+        502,
+        'INVALID_RESPONSE',
+      ),
+    );
   });
 });

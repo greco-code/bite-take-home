@@ -15,8 +15,22 @@
 }
 
 .error {
-  margin: 0;
-  color: #ffd5cc;
-  font-size: 0.8rem;
-  line-height: 1.5;
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgb(255 213 204 / 32%);
+  border-radius: var(--radius-sm);
+  color: #ffe9e4;
+  background: rgb(25 16 13 / 18%);
+
+  strong {
+    font-size: 0.85rem;
+  }
+
+  p {
+    margin: 0;
+    color: #ffd5cc;
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
 }

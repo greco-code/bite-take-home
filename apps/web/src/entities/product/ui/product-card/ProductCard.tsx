@@ -58,7 +58,7 @@ export function ProductCard({ action, onNavigate, product }: ProductCardProps) {
             href={`/products/${encodeURIComponent(product.id)}`}
             onNavigate={onNavigate}
           >
-            View item <span aria-hidden="true">→</span>
+            View details
           </Link>
           {action}
         </div>
