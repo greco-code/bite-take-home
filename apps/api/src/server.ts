@@ -1,9 +1,7 @@
-import { app } from './app.js';
+import { apiConfig, app } from './index.js';
 
-const port = Number.parseInt(process.env.PORT ?? '4000', 10);
-
-const server = app.listen(port, () => {
-  console.info(`Bite API listening on http://localhost:${port}`);
+const server = app.listen(apiConfig.port, () => {
+  console.info(`Bite API listening on http://localhost:${apiConfig.port}`);
 });
 
 const shutdown = () => {

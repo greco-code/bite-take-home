@@ -4,9 +4,9 @@ Bite is a full-stack ordering application built as a pnpm monorepo. The project
 contains a Next.js customer application, an Express API, and a shared package for
 runtime validation and API contracts.
 
-> Project status: the workspace and development servers are ready. Catalog,
-> cart, checkout, PostgreSQL persistence, and deployment will be implemented in
-> subsequent milestones.
+> Project status: the workspace, product catalog API, PostgreSQL catalog
+> persistence, and API documentation are ready. Cart, checkout, order
+> persistence, and deployment will be implemented in subsequent milestones.
 
 ## Repository structure
 
@@ -23,7 +23,7 @@ the workspace.
 
 ## Prerequisites
 
-- Node.js `22.13.0` through `24.x`
+- Node.js `22.14.0` through `24.x`
 - Corepack, which is included with the supported Node.js versions
 - Git
 
@@ -76,19 +76,19 @@ Both generated files are ignored by Git. Never commit real credentials.
 
 `apps/api/.env`:
 
-| Variable       | Required now | Purpose                                                              |
-| -------------- | ------------ | -------------------------------------------------------------------- |
-| `PORT`         | No           | Express port. Defaults to `4000`.                                    |
-| `DATABASE_URL` | Not yet      | Neon PostgreSQL connection string used by the persistence milestone. |
-| `WEB_ORIGINS`  | Not yet      | Comma-separated browser origins allowed by CORS.                     |
+| Variable       | Required | Purpose                                                            |
+| -------------- | -------- | ------------------------------------------------------------------ |
+| `PORT`         | No       | Express port. Defaults to `4000`.                                  |
+| `DATABASE_URL` | Yes      | Neon PostgreSQL connection string used by Drizzle.                 |
+| `WEB_ORIGINS`  | No       | Comma-separated browser origins allowed by CORS. Defaults locally. |
 
 Replace the example `DATABASE_URL` with the connection string supplied by Neon
 before running database migrations or persistence features. It is a server-only
 secret and must never use a `NEXT_PUBLIC_` prefix.
 
-The API development and production-start scripts load `apps/api/.env`
-automatically. Development can currently run without this file because the API
-has a default port and does not connect to PostgreSQL yet.
+The API development, production-start, and catalog-import scripts load
+`apps/api/.env` automatically. The API requires `DATABASE_URL` because catalog
+requests read from PostgreSQL.
 
 ### Web environment
 
@@ -113,11 +113,41 @@ Restart the relevant development server after changing an environment file.
 
 The browser calls the Express API directly using `NEXT_PUBLIC_API_URL`. In local
 development, that means the web application on port `3000` requests the API on
-port `4000`. The API will use `WEB_ORIGINS` as an explicit CORS allow-list when
-catalog endpoints are introduced.
+port `4000`. The API uses `WEB_ORIGINS` as an explicit CORS allow-list.
 
 This deliberately keeps the two deployable applications independent. Do not add
 a Next.js `/api` rewrite unless that deployment decision is revisited.
+
+## Database setup
+
+Create a Neon PostgreSQL project and place its pooled connection string in
+`apps/api/.env`. Then apply the checked-in migration:
+
+```bash
+pnpm --filter @bite/api db:migrate
+```
+
+Import the starter catalog:
+
+```bash
+pnpm --filter @bite/api catalog:import
+```
+
+The import is idempotent: it inserts new product IDs and updates matching IDs.
+It never deletes catalog rows. Schema migrations and imports are explicit
+commands and are never run during application startup.
+
+Neon is the PostgreSQL provider; Drizzle does not replace PostgreSQL. It is the
+thin schema, migration, and type-safe query layer used on top of Neon. Keeping
+it gives the upcoming order and order-line tables reviewed SQL migrations and
+typed queries without introducing a generated database client. Database access
+still stays explicit in the API repositories.
+
+When the Drizzle schema changes, generate and review a new SQL migration:
+
+```bash
+pnpm --filter @bite/api db:generate
+```
 
 ## Running locally
 
@@ -132,16 +162,30 @@ for installation and workspace maintenance.
 
 Local services:
 
-| Service    | URL                            |
-| ---------- | ------------------------------ |
-| Web        | <http://localhost:3000>        |
-| API health | <http://localhost:4000/health> |
+| Service      | URL                                  |
+| ------------ | ------------------------------------ |
+| Web          | <http://localhost:3000>              |
+| API health   | <http://localhost:4000/health>       |
+| Product list | <http://localhost:4000/v1/products>  |
+| OpenAPI JSON | <http://localhost:4000/openapi.json> |
+| Swagger UI   | <http://localhost:4000/docs>         |
 
 The health endpoint should return:
 
 ```json
 { "status": "ok" }
 ```
+
+Catalog endpoints:
+
+| Method | Path                       | Purpose                    |
+| ------ | -------------------------- | -------------------------- |
+| `GET`  | `/v1/products`             | List all catalog products. |
+| `GET`  | `/v1/products/{productId}` | Retrieve one product.      |
+
+The OpenAPI 3.1 document is generated from the shared Zod contracts rather than
+maintained separately. Swagger UI renders that document and can execute requests
+against the current API origin.
 
 Run only one application when needed:
 
@@ -190,8 +234,9 @@ pnpm --filter @bite/api lint
 pnpm --filter @bite/contracts test
 ```
 
-The current test commands succeed without test files while the scaffold is
-empty. Each behavior milestone will add its tests alongside the implementation.
+The API test suite covers health, catalog responses and errors, CORS, the
+OpenAPI document, and Swagger UI. Frontend behavior tests will be added with the
+first customer-facing catalog milestone.
 
 ## Troubleshooting
 
@@ -228,7 +273,7 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 ```
 
-The API currently continues with safe local defaults when `.env` is absent.
+The API reports a clear startup error when `DATABASE_URL` is absent.
 
 ### Port already in use
 

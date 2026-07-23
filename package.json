@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@10.34.5",
   "engines": {
-    "node": ">=22.13.0 <25"
+    "node": ">=22.14.0 <25"
   },
   "scripts": {
     "dev": "cross-env TURBO_TELEMETRY_DISABLED=1 turbo dev",

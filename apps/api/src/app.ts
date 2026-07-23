@@ -1,12 +1,81 @@
-import express, { type Express } from 'express';
+import cors from 'cors';
+import express, {
+  type ErrorRequestHandler,
+  type Express,
+  type RequestHandler,
+} from 'express';
+import swaggerUi from 'swagger-ui-express';
 
-import { healthResponseSchema } from '@bite/contracts';
+import { apiErrorResponseSchema, healthResponseSchema } from '@bite/contracts';
 
-export const app: Express = express();
+import { type CatalogRepository } from './features/catalog/catalog.repository.js';
+import { createCatalogRouter } from './features/catalog/catalog.routes.js';
+import { openApiDocument } from './openapi.js';
 
-app.disable('x-powered-by');
-app.use(express.json({ limit: '1mb' }));
+type AppDependencies = Readonly<{
+  catalogRepository: CatalogRepository;
+  webOrigins: string[];
+}>;
 
-app.get('/health', (_request, response) => {
-  response.json(healthResponseSchema.parse({ status: 'ok' }));
-});
+const createCorsMiddleware = (webOrigins: string[]): RequestHandler => {
+  const allowedOrigins = new Set(webOrigins);
+
+  return cors({
+    origin(origin, callback) {
+      callback(null, !origin || allowedOrigins.has(origin));
+    },
+  });
+};
+
+const errorHandler: ErrorRequestHandler = (error, _request, response, next) => {
+  if (response.headersSent) {
+    next(error);
+    return;
+  }
+
+  console.error(
+    'Unhandled API error:',
+    error instanceof Error ? error.message : 'Unknown error',
+  );
+  response.status(500).json(
+    apiErrorResponseSchema.parse({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An unexpected error occurred.',
+      },
+    }),
+  );
+};
+
+export const createApp = ({
+  catalogRepository,
+  webOrigins,
+}: AppDependencies): Express => {
+  const app = express();
+
+  app.disable('x-powered-by');
+  app.use(createCorsMiddleware(webOrigins));
+  app.use(express.json({ limit: '1mb' }));
+
+  app.get('/health', (_request, response) => {
+    response.json(healthResponseSchema.parse({ status: 'ok' }));
+  });
+
+  app.get('/openapi.json', (_request, response) => {
+    response.json(openApiDocument);
+  });
+
+  app.use(
+    '/docs',
+    swaggerUi.serve,
+    swaggerUi.setup(openApiDocument, {
+      customSiteTitle: 'Bite API documentation',
+    }),
+  );
+
+  app.use('/v1/products', createCatalogRouter(catalogRepository));
+
+  app.use(errorHandler);
+
+  return app;
+};
