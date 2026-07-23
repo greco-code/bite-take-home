@@ -29,6 +29,7 @@ type CartContextValue = Readonly<{
   itemCount: number;
   subtotal: number;
   addProduct: (product: Product) => void;
+  clearCart: () => void;
   decrementLine: (lineId: string) => void;
   incrementLine: (lineId: string) => void;
   removeLine: (lineId: string) => void;
@@ -74,6 +75,7 @@ export function CartProvider({ children }: CartProviderProps) {
           lineId: crypto.randomUUID(),
           product,
         }),
+      clearCart: () => update({ type: 'clear' }),
       decrementLine: (lineId) => update({ type: 'decrement', lineId }),
       incrementLine: (lineId) => update({ type: 'increment', lineId }),
       removeLine: (lineId) => update({ type: 'remove', lineId }),

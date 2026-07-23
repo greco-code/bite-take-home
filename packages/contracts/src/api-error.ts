@@ -2,7 +2,9 @@ import { z } from 'zod';
 
 export const apiErrorCodeSchema = z.enum([
   'INVALID_REQUEST',
+  'ORDER_NOT_FOUND',
   'PRODUCT_NOT_FOUND',
+  'PRODUCT_UNAVAILABLE',
   'INTERNAL_ERROR',
 ]);
 

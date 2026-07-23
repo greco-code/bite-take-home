@@ -3,6 +3,7 @@
 import Link from 'next/link';
 
 import { useCart } from '@/entities/cart';
+import { CheckoutButton } from '@/features/checkout';
 import { formatPrice } from '@/shared/lib/format-price';
 
 import { CartLineItem } from '../cart-line-item';
@@ -68,8 +69,10 @@ export function CartPage() {
               <strong>{formatPrice(subtotal)}</strong>
             </div>
             <p className={styles.summaryNote}>
-              Taxes and final prices will be confirmed at checkout.
+              Final prices are confirmed against the live menu when you complete
+              the order.
             </p>
+            <CheckoutButton />
           </aside>
         </div>
       )}

@@ -18,6 +18,7 @@ export type CartState = Readonly<{
 
 export type CartAction =
   | Readonly<{ type: 'add'; lineId: string; product: Product }>
+  | Readonly<{ type: 'clear' }>
   | Readonly<{ type: 'decrement'; lineId: string }>
   | Readonly<{ type: 'hydrate'; state: CartState }>
   | Readonly<{ type: 'increment'; lineId: string }>
@@ -47,6 +48,9 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
           },
         ],
       };
+
+    case 'clear':
+      return EMPTY_CART;
 
     case 'decrement':
       return {

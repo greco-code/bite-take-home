@@ -4,10 +4,10 @@ Bite is a full-stack ordering application built as a pnpm monorepo. The project
 contains a Next.js customer application, an Express API, and a shared package for
 runtime validation and API contracts.
 
-> Project status: the workspace, responsive product catalog and details,
-> persistent anonymous cart, PostgreSQL catalog persistence, API, and API
-> documentation are ready. Checkout, order persistence, and deployment will be
-> implemented in subsequent milestones.
+> Project status: the workspace, responsive catalog and product details,
+> persistent anonymous cart, checkout, PostgreSQL order persistence, and API
+> documentation are ready. Deployment will be implemented in a subsequent
+> milestone.
 
 ## Repository structure
 
@@ -140,10 +140,10 @@ catalog rows. Schema migrations and imports are explicit commands and are never
 run during application startup.
 
 Neon is the PostgreSQL provider; Drizzle does not replace PostgreSQL. It is the
-thin schema, migration, and type-safe query layer used on top of Neon. Keeping
-it gives the upcoming order and order-line tables reviewed SQL migrations and
-typed queries without introducing a generated database client. Database access
-still stays explicit in the API repositories.
+thin schema, migration, and type-safe query layer used on top of Neon. It gives
+the product, order, and order-line tables reviewed SQL migrations and typed
+queries without introducing a generated database client. Database access still
+stays explicit in the API repositories.
 
 When the Drizzle schema changes, generate and review a new SQL migration:
 
@@ -185,13 +185,21 @@ Catalog endpoints:
 | `GET`  | `/v1/products`             | List all catalog products. |
 | `GET`  | `/v1/products/{productId}` | Retrieve one product.      |
 
+Order endpoints:
+
+| Method | Path                   | Purpose                                   |
+| ------ | ---------------------- | ----------------------------------------- |
+| `POST` | `/v1/orders`           | Price and persist a completed order.      |
+| `GET`  | `/v1/orders/{orderId}` | Retrieve a receipt using `x-order-token`. |
+
 Customer routes:
 
 | Path                    | Purpose                                   |
 | ----------------------- | ----------------------------------------- |
 | `/`                     | Browse the responsive menu and add items. |
 | `/products/{productId}` | View one product and add it to the cart.  |
-| `/cart`                 | Review and update the anonymous cart.     |
+| `/cart`                 | Review, update, and complete the order.   |
+| `/orders/{orderId}`     | View the completed order in this browser. |
 
 The home route fetches the catalog in a request-time Server Component, includes
 the products in the initial HTML, and passes that data into TanStack Query as
@@ -202,8 +210,22 @@ validated against the shared Zod contracts before rendering.
 Cart state is stored in the browser under the versioned `bite.cart.v1` key. Each
 add action creates a new cart line—even for the same product—while decrement,
 increment, and remove actions target one line at a time. Stored product data is
-a display snapshot only; checkout will re-read product availability and
-authoritative prices from the API before creating an order.
+a display snapshot only. Checkout submits product IDs and quantities; the API
+re-reads product availability and authoritative prices, persists the order and
+its positioned line snapshots atomically, and clears the cart only after
+success.
+
+There is no user account or authentication flow. On checkout, the API returns an
+opaque receipt token once and stores only its SHA-256 hash in PostgreSQL. The
+browser stores the token under an order-specific local-storage key and sends it
+in the `x-order-token` header when loading `/orders/{orderId}`. This lets the
+same browser reload the receipt without exposing the token in the URL.
+
+Order creation is intentionally not idempotency-key protected in this
+time-boxed, no-payment application. The checkout button is disabled while a
+request is pending and mutation retries are explicitly disabled. A production
+payment flow should persist an idempotency key and request fingerprint, then
+replay the original response when the same request is received again.
 
 The OpenAPI 3.1 document is generated from the shared Zod contracts rather than
 maintained separately. Swagger UI renders that document and can execute requests
@@ -256,9 +278,10 @@ pnpm --filter @bite/api lint
 pnpm --filter @bite/contracts test
 ```
 
-The API test suite covers health, catalog responses and errors, CORS, the
-OpenAPI document, and Swagger UI. Frontend tests cover cart behavior and storage
-validation, catalog response validation, encoded product URLs, API errors, and
+The API test suite covers health, catalog and order responses, authoritative
+order pricing, unavailable products, anonymous receipt access, CORS, the OpenAPI
+document, and Swagger UI. Frontend tests cover cart and receipt storage,
+checkout requests, catalog response validation, encoded URLs, API errors, and
 price formatting.
 
 ## Troubleshooting
@@ -310,5 +333,7 @@ Either stop the process using ports `3000` or `4000`, or change `PORT` in
 - Treat `DATABASE_URL` as a secret.
 - Treat `NEXT_PUBLIC_*` variables as public browser configuration.
 - Do not log environment values or connection strings.
-- Completed orders will be priced and persisted by the API rather than trusting
+- Completed orders are priced and persisted by the API rather than trusting
   browser-submitted totals.
+- Anonymous receipt tokens are sent in a request header, never in a URL, and
+  only their hashes are stored in PostgreSQL.

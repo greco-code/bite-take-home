@@ -73,6 +73,14 @@ describe('cart model', () => {
     );
   });
 
+  it('clears every cart line after checkout', () => {
+    const state = {
+      lines: [{ id: 'line-1', product, quantity: 2 }],
+    };
+
+    expect(cartReducer(state, { type: 'clear' })).toBe(EMPTY_CART);
+  });
+
   it('round-trips valid versioned storage', () => {
     const state = {
       lines: [{ id: 'line-1', product, quantity: 2 }],

@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 
 import { type Product } from '@bite/contracts';
 
@@ -7,6 +7,7 @@ import { products } from '../../database/schema.js';
 
 export interface CatalogRepository {
   findProductById(productId: string): Promise<Product | null>;
+  findProductsByIds(productIds: string[]): Promise<Product[]>;
   listProducts(): Promise<Product[]>;
 }
 
@@ -21,6 +22,17 @@ export const createCatalogRepository = (
       .limit(1);
 
     return product ?? null;
+  },
+
+  async findProductsByIds(productIds) {
+    if (productIds.length === 0) {
+      return [];
+    }
+
+    return database
+      .select()
+      .from(products)
+      .where(inArray(products.id, productIds));
   },
 
   async listProducts() {
