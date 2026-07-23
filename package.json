@@ -1,0 +1,26 @@
+{
+  "name": "bite",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.34.5",
+  "engines": {
+    "node": ">=22.13.0 <25"
+  },
+  "scripts": {
+    "dev": "cross-env TURBO_TELEMETRY_DISABLED=1 turbo dev",
+    "dev:web": "pnpm --filter @bite/web dev",
+    "dev:api": "pnpm --filter @bite/api dev",
+    "build": "cross-env TURBO_TELEMETRY_DISABLED=1 turbo build",
+    "lint": "cross-env TURBO_TELEMETRY_DISABLED=1 turbo lint",
+    "typecheck": "cross-env TURBO_TELEMETRY_DISABLED=1 turbo typecheck",
+    "test": "cross-env TURBO_TELEMETRY_DISABLED=1 turbo test",
+    "format": "prettier --check .",
+    "format:write": "prettier --write ."
+  },
+  "devDependencies": {
+    "cross-env": "10.1.0",
+    "prettier": "3.9.6",
+    "turbo": "2.10.6",
+    "typescript": "6.0.3"
+  }
+}

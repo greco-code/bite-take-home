@@ -1,0 +1,31 @@
+:root {
+  --color-background: #f7f7f8;
+  --color-surface: #ffffff;
+  --color-text: #171719;
+  --color-muted: #66666f;
+  --color-border: #dedee3;
+  --color-accent: #2563eb;
+  --radius-md: 0.75rem;
+  --shadow-card: 0 1rem 3rem rgb(17 24 39 / 8%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+  background: var(--color-background);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--color-text);
+  background: var(--color-background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+a {
+  color: inherit;
+}
