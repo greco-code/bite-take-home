@@ -1,0 +1,22 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 64 64"
+  role="img"
+  aria-label="Bite"
+>
+  <path
+    fill="#315441"
+    d="M31.9 4.1c15.5-1.4 27 10.1 28 25.2 1 15.7-11.8 29.4-27.5 30.5l-13.1.1C10.7 60 4 53.2 4 44.7V32C4 17.5 16.5 5.5 31.9 4.1Z"
+  />
+  <text
+    x="32"
+    y="44"
+    fill="#fff"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="34"
+    font-weight="700"
+    text-anchor="middle"
+  >
+    B
+  </text>
+</svg>
