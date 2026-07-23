@@ -4,7 +4,6 @@ import express, {
   type Express,
   type RequestHandler,
 } from 'express';
-import swaggerUi from 'swagger-ui-express';
 
 import { apiErrorResponseSchema, healthResponseSchema } from '@bite/contracts';
 
@@ -12,6 +11,7 @@ import { type CatalogRepository } from './features/catalog/catalog.repository.js
 import { createCatalogRouter } from './features/catalog/catalog.routes.js';
 import { createOrderRouter } from './features/order/order.routes.js';
 import { type OrderService } from './features/order/order.service.js';
+import { openApiDocsHtml } from './openapi-docs.js';
 import { openApiDocument } from './openapi.js';
 
 type AppDependencies = Readonly<{
@@ -50,13 +50,10 @@ const errorHandler: ErrorRequestHandler = (error, _request, response, next) => {
   );
 };
 
-export const createApp = ({
-  catalogRepository,
-  orderService,
-  webOrigins,
-}: AppDependencies): Express => {
-  const app = express();
-
+export const configureApp = (
+  app: Express,
+  { catalogRepository, orderService, webOrigins }: AppDependencies,
+): Express => {
   app.disable('x-powered-by');
   app.use(createCorsMiddleware(webOrigins));
   app.use(express.json({ limit: '1mb' }));
@@ -69,13 +66,9 @@ export const createApp = ({
     response.json(openApiDocument);
   });
 
-  app.use(
-    '/docs',
-    swaggerUi.serve,
-    swaggerUi.setup(openApiDocument, {
-      customSiteTitle: 'Bite API documentation',
-    }),
-  );
+  app.get('/docs', (_request, response) => {
+    response.type('html').send(openApiDocsHtml);
+  });
 
   app.use('/v1/products', createCatalogRouter(catalogRepository));
   app.use('/v1/orders', createOrderRouter(orderService));
@@ -84,3 +77,6 @@ export const createApp = ({
 
   return app;
 };
+
+export const createApp = (dependencies: AppDependencies): Express =>
+  configureApp(express(), dependencies);

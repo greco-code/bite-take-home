@@ -9,6 +9,11 @@ runtime validation and API contracts.
 > documentation are ready. The repository is configured for deployment as two
 > Vercel projects.
 
+## Live application
+
+- Web: [bite-take-home-web.vercel.app](https://bite-take-home-web.vercel.app/)
+- API documentation: [bite-api-eight.vercel.app/docs](https://bite-api-eight.vercel.app/docs/)
+
 ## Repository structure
 
 ```text
@@ -77,15 +82,18 @@ Both generated files are ignored by Git. Never commit real credentials.
 
 `apps/api/.env`:
 
-| Variable       | Required | Purpose                                                            |
-| -------------- | -------- | ------------------------------------------------------------------ |
-| `PORT`         | No       | Express port. Defaults to `4000`.                                  |
-| `DATABASE_URL` | Yes      | Neon PostgreSQL connection string used by Drizzle.                 |
-| `WEB_ORIGINS`  | No       | Comma-separated browser origins allowed by CORS. Defaults locally. |
+| Variable                 | Required | Purpose                                                            |
+| ------------------------ | -------- | ------------------------------------------------------------------ |
+| `PORT`                   | No       | Express port. Defaults to `4000`.                                  |
+| `DATABASE_URL`           | Yes      | Neon runtime connection string; use the pooled URL in production.  |
+| `DATABASE_MIGRATION_URL` | No       | Direct Neon URL used by Drizzle Kit; falls back to `DATABASE_URL`. |
+| `WEB_ORIGINS`            | No       | Comma-separated browser origins allowed by CORS. Defaults locally. |
 
-Replace the example `DATABASE_URL` with the connection string supplied by Neon
-before running database migrations or persistence features. It is a server-only
-secret and must never use a `NEXT_PUBLIC_` prefix.
+Replace the example database URLs with values supplied by Neon before running
+database migrations or persistence features. Both are server-only secrets and
+must never use a `NEXT_PUBLIC_` prefix. Neon recommends its direct,
+non-pooled connection string for schema migrations; the deployed serverless API
+uses the pooled connection string.
 
 The API development, production-start, and catalog-import scripts load
 `apps/api/.env` automatically. The API requires `DATABASE_URL` because catalog
@@ -121,8 +129,9 @@ a Next.js `/api` rewrite unless that deployment decision is revisited.
 
 ## Database setup
 
-Create a Neon PostgreSQL project and place its pooled connection string in
-`apps/api/.env`. Then apply the checked-in migration:
+Create a Neon PostgreSQL project. Place its pooled connection string in
+`DATABASE_URL` and its direct connection string in `DATABASE_MIGRATION_URL`.
+Then apply the checked-in migrations:
 
 ```bash
 pnpm --filter @bite/api db:migrate
@@ -267,11 +276,16 @@ No `vercel.json` is required. Vercel detects the pnpm workspace and Turborepo
 configuration from the repository root, recognizes Next.js in `apps/web`, and
 recognizes the default Express export in `apps/api/src/index.ts`.
 
+For both projects, leave Vercel's **Include source files outside of the Root
+Directory** option enabled. It is enabled by default for current projects and
+allows each application to build the shared `packages/contracts` workspace.
+
 ### 1. Prepare the database
 
 Against the production Neon database, apply the migrations and import the
-catalog once from a trusted local or CI environment. Load `DATABASE_URL`
-securely through `apps/api/.env` or the CI secret store, then run:
+catalog once from a trusted local or CI environment. Load the pooled
+`DATABASE_URL` and direct `DATABASE_MIGRATION_URL` securely through
+`apps/api/.env` or the CI secret store, then run:
 
 ```bash
 pnpm --filter @bite/api db:migrate
@@ -300,8 +314,13 @@ Add these environment variables:
 | `DATABASE_URL` | Production Neon pooled connection string                    |
 | `WEB_ORIGINS`  | Exact production web origin, for example `https://web.test` |
 
-`PORT` is not needed on Vercel. After deployment, keep the API production URL;
-the web project needs it.
+`DATABASE_MIGRATION_URL` and `PORT` are not needed on Vercel. Do not place the
+direct migration URL in the deployed project. Keep the API production URL after
+deployment; the web project needs it.
+
+Place the API function region near the Neon database region when your Vercel
+plan exposes that setting. Keeping compute and PostgreSQL close avoids
+unnecessary query latency.
 
 ### 3. Create the web project
 

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { type Order, type Product } from '@bite/contracts';
 
-import { createApp } from './app.js';
+import { createApp } from './create-app.js';
 import { type CatalogRepository } from './features/catalog/catalog.repository.js';
 import { type OrderService } from './features/order/order.service.js';
 
@@ -208,5 +208,10 @@ describe('Bite API', () => {
     expect(docsResponse.text).toContain(
       '<title>Bite API documentation</title>',
     );
+    expect(docsResponse.text).toContain(
+      'swagger-ui-dist@5.32.11/swagger-ui-bundle.js',
+    );
+    expect(docsResponse.text).toContain("url: '/openapi.json'");
+    expect(docsResponse.headers['content-type']).toMatch(/^text\/html/);
   });
 });

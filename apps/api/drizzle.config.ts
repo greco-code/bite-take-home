@@ -12,11 +12,13 @@ loadEnvironment({
   quiet: true,
 });
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl =
+  process.env.DATABASE_MIGRATION_URL?.trim() ||
+  process.env.DATABASE_URL?.trim();
 
 if (!databaseUrl) {
   throw new Error(
-    'DATABASE_URL is required. Copy .env.example to .env and add your Neon connection string.',
+    'DATABASE_MIGRATION_URL or DATABASE_URL is required. Copy .env.example to .env and add your Neon connection string.',
   );
 }
 

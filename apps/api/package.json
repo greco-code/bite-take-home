@@ -7,10 +7,10 @@
     "node": ">=22.14.0 <25"
   },
   "scripts": {
-    "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
+    "dev": "tsx watch --env-file-if-exists=.env src/local-server.ts",
     "prebuild": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "build": "tsc -p tsconfig.build.json",
-    "start": "node --env-file-if-exists=.env dist/server.js",
+    "start": "node --env-file-if-exists=.env dist/local-server.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "catalog:import": "tsx --env-file-if-exists=.env src/scripts/import-catalog.ts",
@@ -24,7 +24,6 @@
     "cors": "^2.8.6",
     "drizzle-orm": "^0.45.2",
     "express": "5.2.1",
-    "swagger-ui-express": "^5.0.1",
     "zod-openapi": "^6.0.0"
   },
   "devDependencies": {
@@ -33,7 +32,6 @@
     "@types/express": "5.0.6",
     "@types/node": "24.13.3",
     "@types/supertest": "^7.2.1",
-    "@types/swagger-ui-express": "^4.1.8",
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.10",
     "eslint": "9.39.5",

@@ -1,4 +1,6 @@
-import { createApp } from './app.js';
+import express from 'express';
+
+import { configureApp } from './create-app.js';
 import { readApiConfig } from './config.js';
 import { createDatabase } from './database/client.js';
 import { createCatalogRepository } from './features/catalog/catalog.repository.js';
@@ -9,7 +11,7 @@ export const apiConfig = readApiConfig();
 const database = createDatabase(apiConfig.databaseUrl);
 const catalogRepository = createCatalogRepository(database);
 
-export const app = createApp({
+export const app = configureApp(express(), {
   catalogRepository,
   orderService: createOrderService(
     catalogRepository,
