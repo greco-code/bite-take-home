@@ -25,6 +25,7 @@ import {
 } from './cart';
 
 type CartContextValue = Readonly<{
+  isHydrated: boolean;
   lines: readonly CartLine[];
   itemCount: number;
   subtotal: number;
@@ -41,8 +42,26 @@ type CartProviderProps = Readonly<{
   children: ReactNode;
 }>;
 
+type CartProviderState = CartState &
+  Readonly<{
+    isHydrated: boolean;
+  }>;
+
+const INITIAL_CART_STATE: CartProviderState = {
+  ...EMPTY_CART,
+  isHydrated: false,
+};
+
+const cartProviderReducer = (
+  state: CartProviderState,
+  action: CartAction,
+): CartProviderState => ({
+  ...cartReducer(state, action),
+  isHydrated: action.type === 'hydrate' ? true : state.isHydrated,
+});
+
 export function CartProvider({ children }: CartProviderProps) {
-  const [state, dispatch] = useReducer(cartReducer, EMPTY_CART);
+  const [state, dispatch] = useReducer(cartProviderReducer, INITIAL_CART_STATE);
 
   useEffect(() => {
     let storedCart = EMPTY_CART;
@@ -66,6 +85,7 @@ export function CartProvider({ children }: CartProviderProps) {
     };
 
     return {
+      isHydrated: state.isHydrated,
       lines: state.lines,
       itemCount: getCartItemCount(state),
       subtotal: getCartSubtotal(state),

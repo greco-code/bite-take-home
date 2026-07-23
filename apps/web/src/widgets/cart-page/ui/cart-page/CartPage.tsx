@@ -14,6 +14,7 @@ export function CartPage() {
   const {
     decrementLine,
     incrementLine,
+    isHydrated,
     itemCount,
     lines,
     removeLine,
@@ -27,7 +28,7 @@ export function CartPage() {
           <p className={styles.eyebrow}>Your order</p>
           <h1 className={styles.title}>Cart</h1>
         </div>
-        {lines.length > 0 ? (
+        {isHydrated && lines.length > 0 ? (
           <p className={styles.count}>
             {itemCount} {itemCount === 1 ? 'item' : 'items'} across{' '}
             {lines.length} {lines.length === 1 ? 'line' : 'lines'}
@@ -35,7 +36,17 @@ export function CartPage() {
         ) : null}
       </div>
 
-      {lines.length === 0 ? (
+      {!isHydrated ? (
+        <section
+          className={styles.loading}
+          aria-busy="true"
+          aria-label="Loading cart"
+        >
+          <div className={styles.loadingLineWide} />
+          <div className={styles.loadingLine} />
+          <span role="status">Loading your cart…</span>
+        </section>
+      ) : lines.length === 0 ? (
         <section className={styles.empty}>
           <p className={styles.emptyEyebrow}>Nothing here yet</p>
           <h2>Your next favorite is waiting.</h2>

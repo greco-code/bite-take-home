@@ -63,6 +63,39 @@
   }
 }
 
+.loading {
+  display: grid;
+  max-width: 46rem;
+  gap: 1rem;
+  padding: clamp(2rem, 6vw, 5rem);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+
+  span {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    font-weight: 750;
+  }
+}
+
+.loadingLine,
+.loadingLineWide {
+  height: 1rem;
+  border-radius: 999px;
+  background: var(--color-brand-soft);
+}
+
+.loadingLine {
+  width: min(70%, 24rem);
+}
+
+.loadingLineWide {
+  width: min(90%, 34rem);
+  height: 2.75rem;
+}
+
 .menuLink {
   display: inline-flex;
   min-height: 2.75rem;

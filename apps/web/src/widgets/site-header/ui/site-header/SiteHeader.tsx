@@ -7,8 +7,10 @@ import { useCart } from '@/entities/cart';
 import styles from './SiteHeader.module.scss';
 
 export function SiteHeader() {
-  const { itemCount } = useCart();
-  const itemLabel = `${itemCount} ${itemCount === 1 ? 'item' : 'items'}`;
+  const { isHydrated, itemCount } = useCart();
+  const itemLabel = isHydrated
+    ? `${itemCount} ${itemCount === 1 ? 'item' : 'items'}`
+    : 'Cart loading';
 
   return (
     <>
@@ -32,7 +34,7 @@ export function SiteHeader() {
                 aria-label={itemLabel}
                 aria-live="polite"
               >
-                {itemCount}
+                {isHydrated ? itemCount : '…'}
               </span>
             </Link>
           </div>

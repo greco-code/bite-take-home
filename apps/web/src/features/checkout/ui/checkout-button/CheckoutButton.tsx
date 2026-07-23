@@ -1,17 +1,21 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
 
 import { useCart } from '@/entities/cart';
 import { saveOrderReceiptToken } from '@/entities/order';
 import { Button } from '@/shared/ui/button';
 
-import { useCheckoutMutation } from '../../model';
+import { cacheCompletedOrder, useCheckoutMutation } from '../../model';
 
 import styles from './CheckoutButton.module.scss';
 
 export function CheckoutButton() {
+  const queryClient = useQueryClient();
   const router = useRouter();
+  const [isNavigating, startNavigation] = useTransition();
   const { clearCart, lines } = useCart();
   const { error, isPending, mutate, reset } = useCheckoutMutation();
 
@@ -26,9 +30,12 @@ export function CheckoutButton() {
       },
       {
         onSuccess: ({ order, receiptToken }) => {
+          cacheCompletedOrder(queryClient, order);
           saveOrderReceiptToken(order.id, receiptToken);
-          clearCart();
-          router.push(`/orders/${order.id}`);
+          startNavigation(() => {
+            clearCart();
+            router.push(`/orders/${order.id}`);
+          });
         },
       },
     );
@@ -39,10 +46,14 @@ export function CheckoutButton() {
       <Button
         aria-describedby={error ? 'checkout-error' : undefined}
         className={styles.button}
-        disabled={isPending || lines.length === 0}
+        disabled={isPending || isNavigating || lines.length === 0}
         onClick={completeOrder}
       >
-        {isPending ? 'Completing order…' : 'Complete order'}
+        {isPending
+          ? 'Completing order…'
+          : isNavigating
+            ? 'Opening receipt…'
+            : 'Complete order'}
       </Button>
       {error ? (
         <p className={styles.error} id="checkout-error" role="alert">
