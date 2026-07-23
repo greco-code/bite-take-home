@@ -1,0 +1,96 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { ApiError } from '@/shared/api';
+
+import { fetchProduct, fetchProducts } from './product-api';
+
+const product = {
+  id: '1',
+  name: 'Maine Root-Cola',
+  description: 'Classic pizza with fresh mozzarella and basil.',
+  price: 395,
+  imageUrl:
+    'https://assets.admin.getabite.co/items/olo/6217611-1563923718946.jpg',
+};
+
+describe('catalog API client', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it('validates and returns the product list', async () => {
+    vi.stubEnv('NEXT_PUBLIC_API_URL', 'http://localhost:4000/');
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([product]), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchProducts()).resolves.toEqual([product]);
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://localhost:4000/v1/products',
+      { signal: null },
+    );
+  });
+
+  it('encodes product identifiers before requesting one product', async () => {
+    vi.stubEnv('NEXT_PUBLIC_API_URL', 'http://localhost:4000');
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(product), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await fetchProduct('special/item');
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://localhost:4000/v1/products/special%2Fitem',
+      { signal: null },
+    );
+  });
+
+  it('turns structured API failures into a typed error', async () => {
+    vi.stubEnv('NEXT_PUBLIC_API_URL', 'http://localhost:4000');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            error: {
+              code: 'PRODUCT_NOT_FOUND',
+              message: 'Product not found.',
+            },
+          }),
+          {
+            status: 404,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        ),
+      ),
+    );
+
+    await expect(fetchProduct('missing')).rejects.toEqual(
+      new ApiError('Product not found.', 404),
+    );
+  });
+
+  it('rejects catalog responses that do not match the shared contract', async () => {
+    vi.stubEnv('NEXT_PUBLIC_API_URL', 'http://localhost:4000');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify([{ ...product, price: -1 }]), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      ),
+    );
+
+    await expect(fetchProducts()).rejects.toThrow();
+  });
+});

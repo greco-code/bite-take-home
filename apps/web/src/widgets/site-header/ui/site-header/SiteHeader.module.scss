@@ -1,0 +1,71 @@
+.skipLink {
+  position: fixed;
+  z-index: 20;
+  top: 0.75rem;
+  left: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  background: var(--color-focus);
+  font-weight: 750;
+  transform: translateY(-200%);
+
+  &:focus {
+    transform: translateY(0);
+  }
+}
+
+.header {
+  border-bottom: 1px solid rgb(94 89 79 / 16%);
+  background: rgb(246 241 232 / 88%);
+  backdrop-filter: blur(1rem);
+}
+
+.inner {
+  display: flex;
+  width: min(100% - 2rem, var(--content-width));
+  min-height: 5rem;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 auto;
+}
+
+.brand {
+  display: inline-flex;
+  gap: 0.65rem;
+  align-items: center;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.mark {
+  display: grid;
+  width: 2.3rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50% 50% 50% 20%;
+  color: #fff;
+  background: var(--color-brand);
+  font-family: inherit;
+  font-size: 1.15rem;
+  transform: rotate(-5deg);
+}
+
+.tagline {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+@media (max-width: 34rem) {
+  .inner {
+    width: min(100% - 1.25rem, var(--content-width));
+  }
+
+  .tagline {
+    display: none;
+  }
+}

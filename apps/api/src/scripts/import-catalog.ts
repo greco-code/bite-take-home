@@ -15,10 +15,14 @@ const importCatalog = async () => {
   const items = productListResponseSchema.parse(
     JSON.parse(await readFile(itemsFile, 'utf8')),
   );
+  const productRows = items.map((item, index) => ({
+    ...item,
+    displayOrder: index + 1,
+  }));
 
   await database
     .insert(products)
-    .values(items)
+    .values(productRows)
     .onConflictDoUpdate({
       target: products.id,
       set: {
@@ -26,6 +30,7 @@ const importCatalog = async () => {
         description: sql`excluded.description`,
         price: sql`excluded.price_cents`,
         imageUrl: sql`excluded.image_url`,
+        displayOrder: sql`excluded.display_order`,
       },
     });
 

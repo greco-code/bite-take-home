@@ -4,9 +4,10 @@ Bite is a full-stack ordering application built as a pnpm monorepo. The project
 contains a Next.js customer application, an Express API, and a shared package for
 runtime validation and API contracts.
 
-> Project status: the workspace, product catalog API, PostgreSQL catalog
-> persistence, and API documentation are ready. Cart, checkout, order
-> persistence, and deployment will be implemented in subsequent milestones.
+> Project status: the workspace, responsive product catalog, product details,
+> PostgreSQL catalog persistence, API, and API documentation are ready. Cart,
+> checkout, order persistence, and deployment will be implemented in subsequent
+> milestones.
 
 ## Repository structure
 
@@ -134,8 +135,9 @@ pnpm --filter @bite/api catalog:import
 ```
 
 The import is idempotent: it inserts new product IDs and updates matching IDs.
-It never deletes catalog rows. Schema migrations and imports are explicit
-commands and are never run during application startup.
+It also preserves the JSON array as the catalog display order and never deletes
+catalog rows. Schema migrations and imports are explicit commands and are never
+run during application startup.
 
 Neon is the PostgreSQL provider; Drizzle does not replace PostgreSQL. It is the
 thin schema, migration, and type-safe query layer used on top of Neon. Keeping
@@ -182,6 +184,16 @@ Catalog endpoints:
 | ------ | -------------------------- | -------------------------- |
 | `GET`  | `/v1/products`             | List all catalog products. |
 | `GET`  | `/v1/products/{productId}` | Retrieve one product.      |
+
+Customer routes:
+
+| Path                    | Purpose                         |
+| ----------------------- | ------------------------------- |
+| `/`                     | Browse the responsive menu.     |
+| `/products/{productId}` | View one product and its price. |
+
+The customer application uses TanStack Query for catalog server-state and
+validates API responses against the shared Zod contracts before rendering them.
 
 The OpenAPI 3.1 document is generated from the shared Zod contracts rather than
 maintained separately. Swagger UI renders that document and can execute requests
@@ -235,8 +247,8 @@ pnpm --filter @bite/contracts test
 ```
 
 The API test suite covers health, catalog responses and errors, CORS, the
-OpenAPI document, and Swagger UI. Frontend behavior tests will be added with the
-first customer-facing catalog milestone.
+OpenAPI document, and Swagger UI. Frontend tests cover catalog response
+validation, encoded product URLs, API errors, and price formatting.
 
 ## Troubleshooting
 

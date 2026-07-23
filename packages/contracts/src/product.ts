@@ -35,7 +35,8 @@ export type Product = z.infer<typeof productSchema>;
 
 export const productListResponseSchema = z.array(productSchema).meta({
   id: 'ProductListResponse',
-  description: 'Products currently available for ordering.',
+  description:
+    'Products currently available for ordering, in configured display order.',
 });
 
 export type ProductListResponse = z.infer<typeof productListResponseSchema>;

@@ -24,6 +24,9 @@ export const createCatalogRepository = (
   },
 
   async listProducts() {
-    return database.select().from(products).orderBy(products.id);
+    return database
+      .select()
+      .from(products)
+      .orderBy(products.displayOrder, products.id);
   },
 });

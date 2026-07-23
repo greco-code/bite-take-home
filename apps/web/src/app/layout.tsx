@@ -1,10 +1,16 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
+import { QueryProvider } from '@/app/providers/query-provider';
+import { SiteHeader } from '@/widgets/site-header';
+
 import './globals.scss';
 
 export const metadata: Metadata = {
-  title: 'Bite',
+  title: {
+    default: 'Bite',
+    template: '%s | Bite',
+  },
   description: 'A simple online ordering experience.',
 };
 
@@ -15,7 +21,12 @@ type RootLayoutProps = Readonly<{
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <QueryProvider>
+          <SiteHeader />
+          {children}
+        </QueryProvider>
+      </body>
     </html>
   );
 }

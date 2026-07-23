@@ -57,7 +57,8 @@ export const openApiDocument: ReturnType<typeof createDocument> =
           tags: ['Catalog'],
           responses: {
             '200': {
-              description: 'Available products.',
+              description:
+                'Available products in configured catalog display order.',
               content: {
                 'application/json': {
                   schema: productListResponseSchema,

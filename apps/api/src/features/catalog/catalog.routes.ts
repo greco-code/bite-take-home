@@ -32,6 +32,7 @@ export const createCatalogRouter = (
           },
         }),
       );
+
       return;
     }
 
@@ -48,6 +49,7 @@ export const createCatalogRouter = (
           },
         }),
       );
+
       return;
     }
 

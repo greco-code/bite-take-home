@@ -26,6 +26,7 @@
 - Define HTTP inputs and outputs in `@bite/contracts`; do not duplicate wire types in an app.
 - Derive OpenAPI from the Zod contracts and expose it at `/openapi.json`; never maintain a duplicate handwritten specification.
 - Store money as integer cents and calculate final order prices on the API.
+- Store catalog presentation order explicitly; never infer it from product identifiers.
 - Each cart addition creates a distinct cart line, even when the product already exists.
 - Anonymous cart state belongs in versioned browser storage; completed orders belong in PostgreSQL.
 - Guest order retrieval must require the order ID and a separate opaque receipt token. Store only the token hash in PostgreSQL.
@@ -33,13 +34,19 @@
 
 ## Frontend agreements
 
-- Use shadcn/Tailwind for shared UI primitives and global design tokens.
+- Introduce shadcn/Tailwind only when repeated interactive primitives and
+  variants justify the additional styling system; do not add it for one-off
+  layout or loading shapes.
 - Use SCSS Modules for page, widget, feature, and entity composition.
 - Keep each reusable UI component in its own folder with its `.tsx`,
   `.module.scss`, and component-specific tests or stories when present.
 - Keep Next.js special route files (`page.tsx`, `layout.tsx`, `loading.tsx`, and
   similar files) in their route segment as required by the framework. Keep them
   thin and extract reusable or styled UI into co-located component folders.
+- Expose each FSD slice through a focused `index.ts` public API; avoid
+  application-wide barrels that mix unrelated slices.
+- Keep reusable TanStack Query hooks separate from their query-key and
+  query-options definitions.
 - SCSS must consume shared CSS custom properties rather than duplicating design-token values.
 - Browser code calls the Express API directly through `NEXT_PUBLIC_API_URL`; keep the API CORS allow-list explicit and environment-specific.
 - Preserve keyboard navigation, focus visibility, accessible labels, pending states, and responsive behavior.
