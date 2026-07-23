@@ -58,31 +58,45 @@ export function CartLineItem({
           <p>{formatPrice(line.product.price)} each</p>
         </div>
         <div className={styles.lineActions}>
-          <Button
-            disabled={line.quantity === 1}
-            onClick={() => decrementLine(line.id)}
-            size="compact"
-            variant="secondary"
-            aria-label={`Decrease quantity of ${line.product.name}`}
+          <div
+            className={styles.quantityStepper}
+            aria-label={`Quantity for ${line.product.name}`}
+            role="group"
           >
-            − Remove one
-          </Button>
-          <span className={styles.quantity}>Qty {line.quantity}</span>
+            <button
+              aria-label={`Decrease quantity of ${line.product.name}`}
+              className={styles.quantityButton}
+              disabled={line.quantity === 1}
+              onClick={() => decrementLine(line.id)}
+              type="button"
+            >
+              <span aria-hidden="true">−</span>
+            </button>
+            <span
+              aria-label={`Quantity: ${line.quantity}`}
+              aria-live="polite"
+              className={styles.quantity}
+              role="status"
+            >
+              {line.quantity}
+            </span>
+            <button
+              aria-label={`Increase quantity of ${line.product.name}`}
+              className={styles.quantityButton}
+              onClick={() => incrementLine(line.id)}
+              type="button"
+            >
+              <span aria-hidden="true">+</span>
+            </button>
+          </div>
           <Button
-            onClick={() => incrementLine(line.id)}
-            size="compact"
-            variant="secondary"
-            aria-label={`Increase quantity of ${line.product.name}`}
-          >
-            + Add one
-          </Button>
-          <Button
+            className={styles.removeButton}
             onClick={() => removeLine(line.id)}
             size="compact"
             variant="danger"
             aria-label={`Remove ${line.product.name} line from cart`}
           >
-            Remove
+            Remove item
           </Button>
         </div>
       </div>
