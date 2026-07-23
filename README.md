@@ -6,8 +6,8 @@ runtime validation and API contracts.
 
 > Project status: the workspace, responsive catalog and product details,
 > persistent anonymous cart, checkout, PostgreSQL order persistence, and API
-> documentation are ready. Deployment will be implemented in a subsequent
-> milestone.
+> documentation are ready. The repository is configured for deployment as two
+> Vercel projects.
 
 ## Repository structure
 
@@ -255,8 +255,86 @@ pnpm --filter @bite/api start
 pnpm --filter @bite/web start
 ```
 
-The final deployment will use separate Vercel projects for `apps/api` and
-`apps/web`; deployment configuration is added in a later milestone.
+## Deployment
+
+Deploy the repository as two Vercel projects. Keeping the applications separate
+matches local development: the browser calls the Express API directly, and the
+API owns all database access.
+
+No `vercel.json` is required. Vercel detects the pnpm workspace and Turborepo
+configuration from the repository root, recognizes Next.js in `apps/web`, and
+recognizes the default Express export in `apps/api/src/index.ts`.
+
+### 1. Prepare the database
+
+Against the production Neon database, apply the migrations and import the
+catalog once from a trusted local or CI environment. Load `DATABASE_URL`
+securely through `apps/api/.env` or the CI secret store, then run:
+
+```bash
+pnpm --filter @bite/api db:migrate
+pnpm --filter @bite/api catalog:import
+```
+
+Do not add migrations or catalog imports to a Vercel build or application
+startup. Deployments may run concurrently, while these operations should remain
+explicit and reviewable.
+
+### 2. Create the API project
+
+Import this Git repository into Vercel and use these settings:
+
+| Setting          | Value      |
+| ---------------- | ---------- |
+| Root Directory   | `apps/api` |
+| Framework Preset | Express    |
+| Build Command    | Automatic  |
+| Install Command  | Automatic  |
+
+Add these environment variables:
+
+| Variable       | Value                                                       |
+| -------------- | ----------------------------------------------------------- |
+| `DATABASE_URL` | Production Neon pooled connection string                    |
+| `WEB_ORIGINS`  | Exact production web origin, for example `https://web.test` |
+
+`PORT` is not needed on Vercel. After deployment, keep the API production URL;
+the web project needs it.
+
+### 3. Create the web project
+
+Import the same Git repository a second time:
+
+| Setting          | Value      |
+| ---------------- | ---------- |
+| Root Directory   | `apps/web` |
+| Framework Preset | Next.js    |
+| Build Command    | Automatic  |
+| Install Command  | Automatic  |
+
+Set `NEXT_PUBLIC_API_URL` to the API production origin, without a trailing
+slash. This is a public build-time value, so changing it requires a new web
+deployment.
+
+If the final web URL differs from the value initially placed in
+`WEB_ORIGINS`, update the API variable to the exact origin and redeploy the API.
+Keep preview origins explicit as well; do not allow every `*.vercel.app` origin
+just to make arbitrary preview deployments work.
+
+### 4. Verify production
+
+Check the deployed flow in this order:
+
+1. `GET https://<api-origin>/health` returns `{"status":"ok"}`.
+2. `/v1/products`, `/openapi.json`, and `/docs` load from the API.
+3. The web catalog and a product detail page render.
+4. Add duplicate products, increment and decrement quantities, and remove a
+   line.
+5. Complete checkout, confirm the cart clears, and refresh the receipt route to
+   verify anonymous order retrieval.
+
+Vercel project linking metadata is written to `.vercel/` and is intentionally
+ignored by Git.
 
 ## Quality checks
 
