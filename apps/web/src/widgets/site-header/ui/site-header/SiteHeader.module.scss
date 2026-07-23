@@ -80,9 +80,20 @@
   background: var(--color-surface);
   font-size: 0.9rem;
   font-weight: 800;
+  transition:
+    border-color var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out),
+    transform var(--motion-fast) var(--ease-out);
 
   &:hover {
     border-color: var(--color-brand);
+    box-shadow: var(--shadow-action);
+    transform: translateY(-0.1rem);
+  }
+
+  &:active {
+    box-shadow: none;
+    transform: translateY(0.05rem) scale(0.98);
   }
 }
 
@@ -95,6 +106,23 @@
   color: #fff;
   background: var(--color-brand);
   font-size: 0.75rem;
+  animation: cart-count-in 180ms var(--ease-out);
+}
+
+@keyframes cart-count-in {
+  0% {
+    opacity: 0.65;
+    transform: scale(0.75);
+  }
+
+  70% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @media (max-width: 34rem) {

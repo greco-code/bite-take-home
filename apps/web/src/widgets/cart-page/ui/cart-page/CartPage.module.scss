@@ -105,9 +105,20 @@
   color: #fff;
   background: var(--color-accent);
   font-weight: 800;
+  transition:
+    background var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out),
+    transform var(--motion-fast) var(--ease-out);
 
   &:hover {
     background: var(--color-accent-hover);
+    box-shadow: var(--shadow-action);
+    transform: translateY(-0.1rem);
+  }
+
+  &:active {
+    box-shadow: none;
+    transform: translateY(0.05rem) scale(0.98);
   }
 }
 

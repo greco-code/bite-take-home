@@ -33,6 +33,7 @@ export function SiteHeader() {
                 className={styles.cartCount}
                 aria-label={itemLabel}
                 aria-live="polite"
+                key={itemLabel}
               >
                 {isHydrated ? itemCount : '…'}
               </span>

@@ -18,6 +18,9 @@
   --radius-lg: 2rem;
   --shadow-card: 0 1rem 2.5rem rgb(54 46 35 / 9%);
   --shadow-card-hover: 0 1.4rem 3.25rem rgb(54 46 35 / 15%);
+  --shadow-action: 0 0.45rem 1rem rgb(54 46 35 / 12%);
+  --motion-fast: 160ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --content-width: 76rem;
 }
 
