@@ -1,0 +1,123 @@
+.main {
+  display: grid;
+  width: min(100% - 2rem, var(--content-width));
+  min-height: calc(100vh - 5rem);
+  place-items: center;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 7vw, 6rem) 0;
+}
+
+.panel {
+  display: grid;
+  width: min(100%, 48rem);
+  justify-items: start;
+  padding: clamp(2rem, 7vw, 5rem);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      var(--color-brand-soft),
+      transparent 42%
+    ),
+    var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.eyebrow {
+  margin: 0 0 1rem;
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: 850;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.title {
+  max-width: 38rem;
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(3rem, 9vw, 6rem);
+  font-weight: 500;
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+}
+
+.description {
+  max-width: 34rem;
+  margin: 1.5rem 0 0;
+  color: var(--color-muted);
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  line-height: 1.7;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.primaryAction,
+.secondaryAction {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-weight: 800;
+  transition:
+    color var(--motion-fast) var(--ease-out),
+    background var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out),
+    transform var(--motion-fast) var(--ease-out);
+
+  &:hover {
+    box-shadow: var(--shadow-action);
+    transform: translateY(-0.1rem);
+  }
+
+  &:active {
+    box-shadow: none;
+    transform: translateY(0.05rem) scale(0.98);
+  }
+}
+
+.primaryAction {
+  color: #fff;
+  background: var(--color-accent);
+
+  &:hover {
+    background: var(--color-accent-hover);
+  }
+}
+
+.secondaryAction {
+  border-color: var(--color-border);
+  background: var(--color-surface-strong);
+
+  &:hover {
+    border-color: var(--color-brand);
+    color: var(--color-brand);
+  }
+}
+
+@media (max-width: 34rem) {
+  .main {
+    width: min(100% - 1.25rem, var(--content-width));
+    align-items: start;
+    padding-top: 2rem;
+  }
+
+  .panel {
+    border-radius: var(--radius-md);
+  }
+
+  .actions,
+  .actions > * {
+    width: 100%;
+  }
+}
