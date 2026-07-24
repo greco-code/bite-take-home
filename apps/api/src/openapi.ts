@@ -168,6 +168,14 @@ export const openApiDocument: ReturnType<typeof createDocument> =
                 },
               },
             },
+            '413': {
+              description: 'Request body exceeds the configured size limit.',
+              content: {
+                'application/json': {
+                  schema: apiErrorResponseSchema,
+                },
+              },
+            },
             '500': {
               description: 'Unexpected server error.',
               content: {

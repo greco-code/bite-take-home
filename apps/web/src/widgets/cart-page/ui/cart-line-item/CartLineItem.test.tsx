@@ -24,6 +24,7 @@ describe('cart line item', () => {
       <CartLineItem
         decrementLine={vi.fn()}
         incrementLine={vi.fn()}
+        isLocked={false}
         line={line}
         removeLine={vi.fn()}
       />,
@@ -40,5 +41,22 @@ describe('cart line item', () => {
     expect(markup).toContain('Remove item');
     expect(markup).not.toContain('Remove one');
     expect(markup).not.toContain('Add one');
+  });
+
+  it('disables every cart action while checkout is pending', () => {
+    const markup = renderToStaticMarkup(
+      <CartLineItem
+        decrementLine={vi.fn()}
+        incrementLine={vi.fn()}
+        isLocked
+        line={line}
+        removeLine={vi.fn()}
+      />,
+    );
+
+    expect(markup.match(/disabled=""/g)).toHaveLength(3);
+    expect(
+      markup.match(/aria-describedby="cart-checkout-status"/g),
+    ).toHaveLength(3);
   });
 });

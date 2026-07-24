@@ -3,6 +3,7 @@
 import Link from 'next/link';
 
 import { useOrderQuery, useOrderReceiptToken } from '@/entities/order';
+import { ApiError } from '@/shared/api';
 import { formatPrice } from '@/shared/lib/format-price';
 import { StatusPanel } from '@/shared/ui/status-panel';
 
@@ -50,17 +51,29 @@ export function OrderConfirmation({ orderId }: OrderConfirmationProps) {
   }
 
   if (error || !order) {
+    const isTerminalError =
+      error instanceof ApiError && error.status !== 0 && error.status < 500;
+
     return (
       <main className={styles.main} id="main-content">
         <StatusPanel
           description={
-            error?.message ??
-            'The completed order could not be loaded. Please try again.'
+            isTerminalError
+              ? 'This receipt link is invalid, expired, or no longer available.'
+              : (error?.message ??
+                'The completed order could not be loaded. Please try again.')
           }
           eyebrow="Receipt unavailable"
-          onRetry={() => void refetch()}
           title="We could not load your order."
+          {...(!isTerminalError && {
+            onRetry: () => void refetch(),
+          })}
         />
+        {isTerminalError ? (
+          <Link className={styles.menuLink} href="/">
+            Return to the menu
+          </Link>
+        ) : null}
       </main>
     );
   }

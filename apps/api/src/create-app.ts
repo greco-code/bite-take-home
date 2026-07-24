@@ -20,6 +20,11 @@ type AppDependencies = Readonly<{
   webOrigins: string[];
 }>;
 
+type RequestBodyErrorResponse = Readonly<{
+  message: string;
+  status: 400 | 413;
+}>;
+
 const createCorsMiddleware = (webOrigins: string[]): RequestHandler => {
   const allowedOrigins = new Set(webOrigins);
 
@@ -30,9 +35,52 @@ const createCorsMiddleware = (webOrigins: string[]): RequestHandler => {
   });
 };
 
+const getRequestBodyErrorResponse = (
+  error: unknown,
+): RequestBodyErrorResponse | null => {
+  if (
+    typeof error !== 'object' ||
+    error === null ||
+    !('status' in error) ||
+    !('type' in error)
+  ) {
+    return null;
+  }
+
+  if (error.status === 400 && error.type === 'entity.parse.failed') {
+    return {
+      message: 'Request body contains invalid JSON.',
+      status: 400,
+    };
+  }
+
+  if (error.status === 413 && error.type === 'entity.too.large') {
+    return {
+      message: 'Request body is too large.',
+      status: 413,
+    };
+  }
+
+  return null;
+};
+
 const errorHandler: ErrorRequestHandler = (error, _request, response, next) => {
   if (response.headersSent) {
     next(error);
+    return;
+  }
+
+  const requestBodyError = getRequestBodyErrorResponse(error);
+
+  if (requestBodyError) {
+    response.status(requestBodyError.status).json(
+      apiErrorResponseSchema.parse({
+        error: {
+          code: 'INVALID_REQUEST',
+          message: requestBodyError.message,
+        },
+      }),
+    );
     return;
   }
 

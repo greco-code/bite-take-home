@@ -13,6 +13,7 @@ import styles from './CartLineItem.module.scss';
 type CartLineItemProps = Readonly<{
   decrementLine: (lineId: string) => void;
   incrementLine: (lineId: string) => void;
+  isLocked: boolean;
   line: CartLine;
   removeLine: (lineId: string) => void;
 }>;
@@ -20,6 +21,7 @@ type CartLineItemProps = Readonly<{
 export function CartLineItem({
   decrementLine,
   incrementLine,
+  isLocked,
   line,
   removeLine,
 }: CartLineItemProps) {
@@ -65,8 +67,9 @@ export function CartLineItem({
           >
             <button
               aria-label={`Decrease quantity of ${line.product.name}`}
+              aria-describedby={isLocked ? 'cart-checkout-status' : undefined}
               className={styles.quantityButton}
-              disabled={line.quantity === 1}
+              disabled={isLocked || line.quantity === 1}
               onClick={() => decrementLine(line.id)}
               type="button"
             >
@@ -82,7 +85,9 @@ export function CartLineItem({
             </span>
             <button
               aria-label={`Increase quantity of ${line.product.name}`}
+              aria-describedby={isLocked ? 'cart-checkout-status' : undefined}
               className={styles.quantityButton}
+              disabled={isLocked}
               onClick={() => incrementLine(line.id)}
               type="button"
             >
@@ -91,10 +96,12 @@ export function CartLineItem({
           </div>
           <Button
             className={styles.removeButton}
+            disabled={isLocked}
             onClick={() => removeLine(line.id)}
             size="compact"
             variant="danger"
             aria-label={`Remove ${line.product.name} line from cart`}
+            aria-describedby={isLocked ? 'cart-checkout-status' : undefined}
           >
             Remove item
           </Button>

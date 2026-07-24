@@ -1,5 +1,17 @@
 import { useMutation } from '@tanstack/react-query';
 
+import { type CreateOrderResponse } from '@bite/contracts';
+
 import { checkoutMutationOptions } from './checkout-mutation-options';
 
-export const useCheckoutMutation = () => useMutation(checkoutMutationOptions);
+type UseCheckoutMutationOptions = Readonly<{
+  onSuccess: (response: CreateOrderResponse) => void;
+}>;
+
+export const useCheckoutMutation = ({
+  onSuccess,
+}: UseCheckoutMutationOptions) =>
+  useMutation({
+    ...checkoutMutationOptions,
+    onSuccess,
+  });

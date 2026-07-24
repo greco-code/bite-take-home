@@ -119,6 +119,41 @@ describe('Bite API', () => {
     expect(response.body.error.code).toBe('INVALID_REQUEST');
   });
 
+  it('reports malformed JSON as an invalid request', async () => {
+    const response = await request(app)
+      .post('/v1/orders')
+      .set('Content-Type', 'application/json')
+      .send('{"lines":')
+      .expect(400);
+
+    expect(response.body).toEqual({
+      error: {
+        code: 'INVALID_REQUEST',
+        message: 'Request body contains invalid JSON.',
+      },
+    });
+  });
+
+  it('rejects request bodies larger than the configured limit', async () => {
+    const response = await request(app)
+      .post('/v1/orders')
+      .set('Content-Type', 'application/json')
+      .send(
+        JSON.stringify({
+          lines: [{ productId: '1', quantity: 1 }],
+          padding: 'x'.repeat(1_048_576),
+        }),
+      )
+      .expect(413);
+
+    expect(response.body).toEqual({
+      error: {
+        code: 'INVALID_REQUEST',
+        message: 'Request body is too large.',
+      },
+    });
+  });
+
   it('rejects an order containing an unavailable product', async () => {
     const response = await request(app)
       .post('/v1/orders')

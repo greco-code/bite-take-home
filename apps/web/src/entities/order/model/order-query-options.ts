@@ -1,5 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
 
+import { ApiError } from '@/shared/api';
+
 import { fetchOrder } from '../api/order-api';
 
 export const orderQueryKeys = {
@@ -20,5 +22,17 @@ export const orderQueryOptions = (
       return fetchOrder(orderId, receiptToken, { signal });
     },
     enabled: receiptToken !== null,
+    retry: shouldRetryOrderQuery,
     staleTime: Number.POSITIVE_INFINITY,
   });
+
+export const shouldRetryOrderQuery = (
+  failureCount: number,
+  error: Error,
+): boolean => {
+  if (error instanceof ApiError && error.status !== 0 && error.status < 500) {
+    return false;
+  }
+
+  return failureCount < 1;
+};

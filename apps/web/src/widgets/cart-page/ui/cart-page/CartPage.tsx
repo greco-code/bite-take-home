@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 
 import { useCart } from '@/entities/cart';
 import { CheckoutButton } from '@/features/checkout';
@@ -11,6 +12,7 @@ import { CartLineItem } from '../cart-line-item';
 import styles from './CartPage.module.scss';
 
 export function CartPage() {
+  const [isCheckoutPending, setIsCheckoutPending] = useState(false);
   const {
     decrementLine,
     incrementLine,
@@ -60,11 +62,16 @@ export function CartPage() {
         </section>
       ) : (
         <div className={styles.layout}>
-          <section className={styles.lines} aria-label="Cart items">
+          <section
+            aria-busy={isCheckoutPending}
+            className={styles.lines}
+            aria-label="Cart items"
+          >
             {lines.map((line) => (
               <CartLineItem
                 decrementLine={decrementLine}
                 incrementLine={incrementLine}
+                isLocked={isCheckoutPending}
                 key={line.id}
                 line={line}
                 removeLine={removeLine}
@@ -83,7 +90,16 @@ export function CartPage() {
               Final prices are confirmed against the live menu when you complete
               the order.
             </p>
-            <CheckoutButton />
+            {isCheckoutPending ? (
+              <p
+                className={styles.pendingNote}
+                id="cart-checkout-status"
+                role="status"
+              >
+                Cart changes are paused while we complete your order.
+              </p>
+            ) : null}
+            <CheckoutButton onPendingChange={setIsCheckoutPending} />
           </aside>
         </div>
       )}

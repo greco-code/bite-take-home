@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useTransition } from 'react';
+import { useEffect, useRef, useTransition } from 'react';
 
 import { useCart } from '@/entities/cart';
 import { saveOrderReceiptToken } from '@/entities/order';
@@ -16,34 +16,52 @@ import {
 
 import styles from './CheckoutButton.module.scss';
 
-export function CheckoutButton() {
+type CheckoutButtonProps = Readonly<{
+  onPendingChange: (isPending: boolean) => void;
+}>;
+
+export function CheckoutButton({ onPendingChange }: CheckoutButtonProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const [isNavigating, startNavigation] = useTransition();
   const { clearCart, lines } = useCart();
-  const { error, isPending, mutate, reset } = useCheckoutMutation();
+  const isMounted = useRef(false);
+  const { error, isPending, mutate, reset } = useCheckoutMutation({
+    onSuccess: ({ order, receiptToken }) => {
+      cacheCompletedOrder(queryClient, order);
+      saveOrderReceiptToken(order.id, receiptToken);
+      clearCart();
+
+      if (isMounted.current) {
+        startNavigation(() => {
+          router.push(`/orders/${order.id}`);
+        });
+      }
+    },
+  });
   const errorContent = error ? getCheckoutErrorContent(error) : null;
+
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+      onPendingChange(false);
+    };
+  }, [onPendingChange]);
+
+  useEffect(() => {
+    onPendingChange(isPending || isNavigating);
+  }, [isNavigating, isPending, onPendingChange]);
 
   const completeOrder = () => {
     reset();
-    mutate(
-      {
-        lines: lines.map((line) => ({
-          productId: line.product.id,
-          quantity: line.quantity,
-        })),
-      },
-      {
-        onSuccess: ({ order, receiptToken }) => {
-          cacheCompletedOrder(queryClient, order);
-          saveOrderReceiptToken(order.id, receiptToken);
-          startNavigation(() => {
-            clearCart();
-            router.push(`/orders/${order.id}`);
-          });
-        },
-      },
-    );
+    mutate({
+      lines: lines.map((line) => ({
+        productId: line.product.id,
+        quantity: line.quantity,
+      })),
+    });
   };
 
   return (
