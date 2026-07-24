@@ -17,10 +17,14 @@ import {
 import styles from './CheckoutButton.module.scss';
 
 type CheckoutButtonProps = Readonly<{
+  onCheckoutStart: () => void;
   onPendingChange: (isPending: boolean) => void;
 }>;
 
-export function CheckoutButton({ onPendingChange }: CheckoutButtonProps) {
+export function CheckoutButton({
+  onCheckoutStart,
+  onPendingChange,
+}: CheckoutButtonProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const [isNavigating, startNavigation] = useTransition();
@@ -55,6 +59,7 @@ export function CheckoutButton({ onPendingChange }: CheckoutButtonProps) {
   }, [isNavigating, isPending, onPendingChange]);
 
   const completeOrder = () => {
+    onCheckoutStart();
     reset();
     mutate({
       lines: lines.map((line) => ({
