@@ -89,7 +89,7 @@ export function ProductDetails({
               src={product.imageUrl}
               alt={product.name}
               fill
-              priority
+              preload
               sizes="(max-width: 52rem) 100vw, 52vw"
               onError={() => setImageFailed(true)}
             />

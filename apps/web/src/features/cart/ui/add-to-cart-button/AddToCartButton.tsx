@@ -18,7 +18,7 @@ export function AddToCartButton({ product, className }: AddToCartButtonProps) {
     <Button
       className={cn(className)}
       onClick={() => addProduct(product)}
-      aria-label={`Add ${product.name} to cart`}
+      aria-label={`Add to cart: ${product.name}`}
     >
       Add to cart
     </Button>

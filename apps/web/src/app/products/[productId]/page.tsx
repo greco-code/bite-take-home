@@ -11,12 +11,14 @@ type ProductPageProps = Readonly<{
   }>;
 }>;
 
+export const revalidate = 300;
+
 export default async function ProductPage({ params }: ProductPageProps) {
   const { productId } = await params;
   let initialProduct: Product | undefined;
 
   try {
-    initialProduct = await fetchProduct(productId, { cache: 'no-store' });
+    initialProduct = await fetchProduct(productId);
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {
       notFound();

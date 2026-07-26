@@ -13,18 +13,25 @@ import styles from './ProductCard.module.scss';
 type ProductCardProps = Readonly<{
   action?: ReactNode;
   onNavigate: () => void;
+  preload?: boolean;
   product: Product;
 }>;
 
-export function ProductCard({ action, onNavigate, product }: ProductCardProps) {
+export function ProductCard({
+  action,
+  onNavigate,
+  preload = false,
+  product,
+}: ProductCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
+  const formattedPrice = formatPrice(product.price);
 
   return (
     <article className={styles.card}>
       <Link
         className={styles.imageLink}
         href={`/products/${encodeURIComponent(product.id)}`}
-        aria-label={`View ${product.name}`}
+        aria-label={`View ${product.name}, ${formattedPrice}`}
         onNavigate={onNavigate}
       >
         <div className={styles.imageWrap}>
@@ -36,11 +43,12 @@ export function ProductCard({ action, onNavigate, product }: ProductCardProps) {
               src={product.imageUrl}
               alt=""
               fill
+              preload={preload}
               sizes="(max-width: 44rem) 100vw, (max-width: 72rem) 50vw, 33vw"
               onError={() => setImageFailed(true)}
             />
           )}
-          <span className={styles.price}>{formatPrice(product.price)}</span>
+          <span className={styles.price}>{formattedPrice}</span>
         </div>
       </Link>
       <div className={styles.content}>

@@ -90,10 +90,11 @@ export function ProductCatalog({ initialProducts }: ProductCatalogProps) {
             )}
           </div>
           <div className={styles.grid}>
-            {products.map((product) => (
+            {products.map((product, index) => (
               <ProductCard
                 action={<AddToCartButton product={product} />}
                 onNavigate={markCatalogOrigin}
+                preload={index === 0}
                 product={product}
                 key={product.id}
               />

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '@/shared/api';
 
-import ProductPage from './page';
+import ProductPage, { revalidate } from './page';
 
 const { fetchProductMock, notFoundMock } = vi.hoisted(() => ({
   fetchProductMock: vi.fn(),
@@ -36,9 +36,8 @@ describe('product page', () => {
       params: Promise.resolve({ productId: product.id }),
     });
 
-    expect(fetchProductMock).toHaveBeenCalledWith(product.id, {
-      cache: 'no-store',
-    });
+    expect(revalidate).toBe(300);
+    expect(fetchProductMock).toHaveBeenCalledWith(product.id);
     expect(page.props).toMatchObject({
       initialProduct: product,
       productId: product.id,
