@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { type CartLine, useCart } from '@/entities/cart';
+import { useCartProductsQuery } from '@/entities/product';
 import { CheckoutButton } from '@/features/checkout';
+import { Button } from '@/shared/ui/button';
 import { formatPrice } from '@/shared/lib/format-price';
 
 import { CartLineItem } from '../cart-line-item';
@@ -30,9 +32,17 @@ export function CartPage() {
     isHydrated,
     itemCount,
     lines,
+    reconcileProducts,
     removeLine,
     subtotal,
   } = useCart();
+  const catalogQuery = useCartProductsQuery(isHydrated && lines.length > 0);
+
+  useEffect(() => {
+    if (catalogQuery.data) {
+      reconcileProducts(catalogQuery.data);
+    }
+  }, [catalogQuery.data, reconcileProducts]);
   const shouldShowSubmittedCart = isCheckoutPending && lines.length === 0;
   const visibleCart = shouldShowSubmittedCart
     ? cartSnapshot
@@ -114,6 +124,26 @@ export function CartPage() {
               Final prices are confirmed against the live menu when you complete
               the order.
             </p>
+            {catalogQuery.isFetching ? (
+              <p className={styles.availabilityStatus} role="status">
+                Refreshing item availability…
+              </p>
+            ) : null}
+            {catalogQuery.isError ? (
+              <div className={styles.availabilityError} role="alert">
+                <p>
+                  We couldn’t refresh the cart. You can retry now or review the
+                  order to check again.
+                </p>
+                <Button
+                  onClick={() => void catalogQuery.refetch()}
+                  size="compact"
+                  variant="secondary"
+                >
+                  Retry refresh
+                </Button>
+              </div>
+            ) : null}
             {isCheckoutPending ? (
               <p
                 className={styles.pendingNote}

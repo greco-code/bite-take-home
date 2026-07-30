@@ -7,7 +7,9 @@ import {
   healthResponseSchema,
   orderAccessHeadersSchema,
   orderParamsSchema,
+  orderPreviewResponseSchema,
   orderResponseSchema,
+  previewOrderRequestSchema,
   productListResponseSchema,
   productParamsSchema,
   productSchema,
@@ -34,7 +36,7 @@ export const openApiDocument: ReturnType<typeof createDocument> =
       },
       {
         name: 'Catalog',
-        description: 'Products available for ordering.',
+        description: 'Catalog products and their current ordering status.',
       },
       {
         name: 'Orders',
@@ -67,7 +69,7 @@ export const openApiDocument: ReturnType<typeof createDocument> =
           responses: {
             '200': {
               description:
-                'Available products in configured catalog display order.',
+                'Catalog products in configured display order, including current availability.',
               content: {
                 'application/json': {
                   schema: productListResponseSchema,
@@ -161,7 +163,8 @@ export const openApiDocument: ReturnType<typeof createDocument> =
               },
             },
             '409': {
-              description: 'One or more products are no longer available.',
+              description:
+                'The reviewed order changed or no products remain available.',
               content: {
                 'application/json': {
                   schema: apiErrorResponseSchema,
@@ -170,6 +173,47 @@ export const openApiDocument: ReturnType<typeof createDocument> =
             },
             '413': {
               description: 'Request body exceeds the configured size limit.',
+              content: {
+                'application/json': {
+                  schema: apiErrorResponseSchema,
+                },
+              },
+            },
+            '500': {
+              description: 'Unexpected server error.',
+              content: {
+                'application/json': {
+                  schema: apiErrorResponseSchema,
+                },
+              },
+            },
+          },
+        },
+      },
+      '/v1/orders/preview': {
+        post: {
+          operationId: 'previewOrder',
+          summary: 'Review live order availability and pricing',
+          tags: ['Orders'],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: previewOrderRequestSchema,
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Live review of all proposed cart lines.',
+              content: {
+                'application/json': {
+                  schema: orderPreviewResponseSchema,
+                },
+              },
+            },
+            '400': {
+              description: 'Invalid cart lines.',
               content: {
                 'application/json': {
                   schema: apiErrorResponseSchema,

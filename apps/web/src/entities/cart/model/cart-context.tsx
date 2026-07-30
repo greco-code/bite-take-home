@@ -3,6 +3,7 @@
 import {
   createContext,
   type ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -34,6 +35,7 @@ type CartContextValue = Readonly<{
   decrementLine: (lineId: string) => void;
   incrementLine: (lineId: string) => void;
   removeLine: (lineId: string) => void;
+  reconcileProducts: (products: readonly Product[]) => void;
 }>;
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -77,30 +79,62 @@ export function CartProvider({ children }: CartProviderProps) {
     dispatch({ type: 'hydrate', state: storedCart });
   }, []);
 
-  const value = useMemo<CartContextValue>(() => {
-    const update = (action: CartAction) => {
-      const nextState = cartReducer(state, action);
-      persistCart(nextState);
-      dispatch(action);
-    };
+  useEffect(() => {
+    if (state.isHydrated) {
+      persistCart(state);
+    }
+  }, [state]);
 
+  const addProduct = useCallback(
+    (product: Product) =>
+      dispatch({
+        type: 'add',
+        lineId: crypto.randomUUID(),
+        product,
+      }),
+    [],
+  );
+  const clearCart = useCallback(() => dispatch({ type: 'clear' }), []);
+  const decrementLine = useCallback(
+    (lineId: string) => dispatch({ type: 'decrement', lineId }),
+    [],
+  );
+  const incrementLine = useCallback(
+    (lineId: string) => dispatch({ type: 'increment', lineId }),
+    [],
+  );
+  const reconcileProducts = useCallback(
+    (products: readonly Product[]) =>
+      dispatch({ type: 'reconcile', products }),
+    [],
+  );
+  const removeLine = useCallback(
+    (lineId: string) => dispatch({ type: 'remove', lineId }),
+    [],
+  );
+
+  const value = useMemo<CartContextValue>(() => {
     return {
       isHydrated: state.isHydrated,
       lines: state.lines,
       itemCount: getCartItemCount(state),
       subtotal: getCartSubtotal(state),
-      addProduct: (product) =>
-        update({
-          type: 'add',
-          lineId: crypto.randomUUID(),
-          product,
-        }),
-      clearCart: () => update({ type: 'clear' }),
-      decrementLine: (lineId) => update({ type: 'decrement', lineId }),
-      incrementLine: (lineId) => update({ type: 'increment', lineId }),
-      removeLine: (lineId) => update({ type: 'remove', lineId }),
+      addProduct,
+      clearCart,
+      decrementLine,
+      incrementLine,
+      reconcileProducts,
+      removeLine,
     };
-  }, [state]);
+  }, [
+    addProduct,
+    clearCart,
+    decrementLine,
+    incrementLine,
+    reconcileProducts,
+    removeLine,
+    state,
+  ]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

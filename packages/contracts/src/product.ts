@@ -5,6 +5,14 @@ export const productIdSchema = z.string().trim().min(1).meta({
   example: '1',
 });
 
+export const productStatusSchema = z.enum(['available', 'unavailable']).meta({
+  id: 'ProductStatus',
+  description: 'Whether the product can currently be ordered.',
+  example: 'available',
+});
+
+export type ProductStatus = z.infer<typeof productStatusSchema>;
+
 export const productSchema = z
   .object({
     id: productIdSchema,
@@ -25,18 +33,18 @@ export const productSchema = z
       example:
         'https://assets.admin.getabite.co/items/olo/6217611-1563923718946.jpg',
     }),
+    status: productStatusSchema,
   })
   .meta({
     id: 'Product',
-    description: 'A product available for ordering.',
+    description: 'A catalog product and its current ordering status.',
   });
 
 export type Product = z.infer<typeof productSchema>;
 
 export const productListResponseSchema = z.array(productSchema).meta({
   id: 'ProductListResponse',
-  description:
-    'Products currently available for ordering, in configured display order.',
+  description: 'Catalog products in configured display order.',
 });
 
 export type ProductListResponse = z.infer<typeof productListResponseSchema>;

@@ -22,6 +22,7 @@ export type CartAction =
   | Readonly<{ type: 'decrement'; lineId: string }>
   | Readonly<{ type: 'hydrate'; state: CartState }>
   | Readonly<{ type: 'increment'; lineId: string }>
+  | Readonly<{ type: 'reconcile'; products: readonly Product[] }>
   | Readonly<{ type: 'remove'; lineId: string }>;
 
 export const EMPTY_CART: CartState = Object.freeze({
@@ -69,6 +70,21 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
             : line,
         ),
       };
+
+    case 'reconcile': {
+      const productsById = new Map(
+        action.products.map((product) => [product.id, product]),
+      );
+
+      return {
+        lines: state.lines.map((line) => ({
+          ...line,
+          product:
+            productsById.get(line.product.id) ??
+            ({ ...line.product, status: 'unavailable' } satisfies Product),
+        })),
+      };
+    }
 
     case 'remove':
       return {
@@ -142,7 +158,11 @@ function parseCartLine(value: unknown): CartLine | null {
     return null;
   }
 
-  const product = productSchema.safeParse(value.product);
+  const productCandidate =
+    isRecord(value.product) && !('status' in value.product)
+      ? { ...value.product, status: 'available' }
+      : value.product;
+  const product = productSchema.safeParse(productCandidate);
 
   if (!product.success) {
     return null;

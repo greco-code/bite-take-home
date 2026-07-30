@@ -27,6 +27,8 @@ export function CartLineItem({
 }: CartLineItemProps) {
   const [imageFailed, setImageFailed] = useState(false);
   const lineTotal = line.product.price * line.quantity;
+  const isUnavailable = line.product.status === 'unavailable';
+  const statusId = `cart-line-status-${line.id}`;
 
   return (
     <article className={styles.line}>
@@ -58,6 +60,11 @@ export function CartLineItem({
             {line.product.name}
           </Link>
           <p>{formatPrice(line.product.price)} each</p>
+          {isUnavailable ? (
+            <p className={styles.unavailable} id={statusId} role="status">
+              Unavailable — this item won’t be included in your order.
+            </p>
+          ) : null}
         </div>
         <div className={styles.lineActions}>
           <div
@@ -67,9 +74,15 @@ export function CartLineItem({
           >
             <button
               aria-label={`Decrease quantity of ${line.product.name}`}
-              aria-describedby={isLocked ? 'cart-checkout-status' : undefined}
+              aria-describedby={
+                isLocked
+                  ? 'cart-checkout-status'
+                  : isUnavailable
+                    ? statusId
+                    : undefined
+              }
               className={styles.quantityButton}
-              disabled={isLocked || line.quantity === 1}
+              disabled={isLocked || isUnavailable || line.quantity === 1}
               onClick={() => decrementLine(line.id)}
               type="button"
             >
@@ -85,9 +98,15 @@ export function CartLineItem({
             </span>
             <button
               aria-label={`Increase quantity of ${line.product.name}`}
-              aria-describedby={isLocked ? 'cart-checkout-status' : undefined}
+              aria-describedby={
+                isLocked
+                  ? 'cart-checkout-status'
+                  : isUnavailable
+                    ? statusId
+                    : undefined
+              }
               className={styles.quantityButton}
-              disabled={isLocked}
+              disabled={isLocked || isUnavailable}
               onClick={() => incrementLine(line.id)}
               type="button"
             >

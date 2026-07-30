@@ -14,6 +14,15 @@ const products: Product[] = [
     description: 'A fair-trade cola.',
     price: 395,
     imageUrl: 'https://example.com/cola.jpg',
+    status: 'available',
+  },
+  {
+    id: '2',
+    name: 'Cookie',
+    description: 'A chocolate chip cookie.',
+    price: 275,
+    imageUrl: 'https://example.com/cookie.jpg',
+    status: 'unavailable',
   },
 ];
 
@@ -57,11 +66,17 @@ describe('order service', () => {
       dependencies.orderRepository,
     );
 
-    const result = await service.createOrder({
+    const request = {
       lines: [
         { productId: '1', quantity: 1 },
         { productId: '1', quantity: 2 },
       ],
+    };
+    const preview = await service.previewOrder(request);
+    const result = await service.createOrder({
+      ...request,
+      reviewToken: preview.reviewToken,
+      acceptUnavailableExclusions: true,
     });
 
     expect(result.status).toBe('created');
@@ -98,18 +113,80 @@ describe('order service', () => {
     );
   });
 
-  it('does not persist an order when a product is unavailable', async () => {
+  it('previews unavailable lines and does not persist an empty order', async () => {
     const dependencies = createDependencies();
     const service = createOrderService(
       dependencies.catalogRepository,
       dependencies.orderRepository,
     );
 
+    const request = { lines: [{ productId: '2', quantity: 1 }] };
+    const preview = await service.previewOrder(request);
     const result = await service.createOrder({
-      lines: [{ productId: 'missing', quantity: 1 }],
+      ...request,
+      reviewToken: preview.reviewToken,
+      acceptUnavailableExclusions: true,
     });
 
-    expect(result).toEqual({ status: 'product-unavailable' });
+    expect(preview.lines).toEqual([
+      { status: 'unavailable', position: 1, productId: '2' },
+    ]);
+    expect(preview.total).toBe(0);
+    expect(result).toEqual({ status: 'no-available-products' });
+    expect(dependencies.createdOrders).toHaveLength(0);
+  });
+
+  it('creates a reviewed order without unavailable lines', async () => {
+    const dependencies = createDependencies();
+    const service = createOrderService(
+      dependencies.catalogRepository,
+      dependencies.orderRepository,
+    );
+    const request = {
+      lines: [
+        { productId: 'missing', quantity: 1 },
+        { productId: '1', quantity: 2 },
+      ],
+    };
+    const preview = await service.previewOrder(request);
+    const result = await service.createOrder({
+      ...request,
+      reviewToken: preview.reviewToken,
+      acceptUnavailableExclusions: true,
+    });
+
+    expect(result.status).toBe('created');
+    expect(dependencies.createdOrders[0]?.order.lines).toEqual([
+      {
+        position: 1,
+        productId: '1',
+        name: 'Maine Root-Cola',
+        unitPrice: 395,
+        quantity: 2,
+        lineTotal: 790,
+      },
+    ]);
+    expect(dependencies.createdOrders[0]?.order.total).toBe(790);
+  });
+
+  it('requires another review when live product data changes', async () => {
+    const dependencies = createDependencies();
+    const service = createOrderService(
+      dependencies.catalogRepository,
+      dependencies.orderRepository,
+    );
+    const request = { lines: [{ productId: '1', quantity: 1 }] };
+    const preview = await service.previewOrder(request);
+
+    products[0]!.price = 450;
+    const result = await service.createOrder({
+      ...request,
+      reviewToken: preview.reviewToken,
+      acceptUnavailableExclusions: true,
+    });
+    products[0]!.price = 395;
+
+    expect(result).toEqual({ status: 'review-required' });
     expect(dependencies.createdOrders).toHaveLength(0);
   });
 });

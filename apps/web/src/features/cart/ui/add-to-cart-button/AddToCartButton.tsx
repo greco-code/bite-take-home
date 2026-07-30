@@ -13,14 +13,20 @@ type AddToCartButtonProps = Readonly<{
 
 export function AddToCartButton({ product, className }: AddToCartButtonProps) {
   const { addProduct } = useCart();
+  const isUnavailable = product.status === 'unavailable';
 
   return (
     <Button
       className={cn(className)}
+      disabled={isUnavailable}
       onClick={() => addProduct(product)}
-      aria-label={`Add to cart: ${product.name}`}
+      aria-label={
+        isUnavailable
+          ? `${product.name} is unavailable`
+          : `Add to cart: ${product.name}`
+      }
     >
-      Add to cart
+      {isUnavailable ? 'Unavailable' : 'Add to cart'}
     </Button>
   );
 }

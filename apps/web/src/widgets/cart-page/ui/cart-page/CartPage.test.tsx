@@ -15,6 +15,15 @@ vi.mock('@/features/checkout', () => ({
   CheckoutButton: () => null,
 }));
 
+vi.mock('@/entities/product', () => ({
+  useCartProductsQuery: () => ({
+    data: undefined,
+    isError: false,
+    isFetching: false,
+    refetch: vi.fn(),
+  }),
+}));
+
 const emptyCart = {
   addProduct: vi.fn(),
   clearCart: vi.fn(),
@@ -23,6 +32,7 @@ const emptyCart = {
   itemCount: 0,
   lines: [],
   removeLine: vi.fn(),
+  reconcileProducts: vi.fn(),
   subtotal: 0,
 };
 

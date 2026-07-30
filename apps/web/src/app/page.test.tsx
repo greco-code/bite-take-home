@@ -18,6 +18,7 @@ const products: Product[] = [
     description: 'A classic cola.',
     price: 395,
     imageUrl: 'https://example.com/root-cola.jpg',
+    status: 'available',
   },
 ];
 

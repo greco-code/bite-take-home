@@ -2,11 +2,17 @@ import { sql } from 'drizzle-orm';
 import {
   check,
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
   timestamp,
 } from 'drizzle-orm/pg-core';
+
+export const productStatus = pgEnum('product_status', [
+  'available',
+  'unavailable',
+]);
 
 export const products = pgTable(
   'products',
@@ -17,6 +23,7 @@ export const products = pgTable(
     price: integer('price_cents').notNull(),
     imageUrl: text('image_url').notNull(),
     displayOrder: integer('display_order').notNull(),
+    status: productStatus('status').default('available').notNull(),
   },
   (table) => [
     check('products_price_cents_nonnegative', sql`${table.price} >= 0`),

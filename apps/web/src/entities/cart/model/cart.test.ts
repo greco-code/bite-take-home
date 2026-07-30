@@ -17,6 +17,7 @@ const product: Product = {
   description: 'A classic cola.',
   price: 395,
   imageUrl: 'https://example.com/cola.jpg',
+  status: 'available',
 };
 
 describe('cart model', () => {
@@ -87,6 +88,65 @@ describe('cart model', () => {
     };
 
     expect(parseStoredCart(serializeCart(state))).toEqual(state);
+  });
+
+  it('preserves legacy cart products until live availability is checked', () => {
+    const legacyProduct = {
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      imageUrl: product.imageUrl,
+    };
+    const storedValue = JSON.stringify({
+      version: 1,
+      lines: [{ id: 'line-1', product: legacyProduct, quantity: 2 }],
+    });
+
+    expect(parseStoredCart(storedValue)).toEqual({
+      lines: [
+        {
+          id: 'line-1',
+          product: { ...legacyProduct, status: 'available' },
+          quantity: 2,
+        },
+      ],
+    });
+  });
+
+  it('reconciles current products and marks missing products unavailable', () => {
+    const otherProduct: Product = {
+      ...product,
+      id: '2',
+      name: 'Cookie',
+    };
+    const state = {
+      lines: [
+        { id: 'line-1', product, quantity: 1 },
+        { id: 'line-2', product: otherProduct, quantity: 2 },
+      ],
+    };
+    const refreshedProduct: Product = {
+      ...product,
+      name: 'Updated Cola',
+      price: 425,
+    };
+
+    expect(
+      cartReducer(state, {
+        type: 'reconcile',
+        products: [refreshedProduct],
+      }),
+    ).toEqual({
+      lines: [
+        { id: 'line-1', product: refreshedProduct, quantity: 1 },
+        {
+          id: 'line-2',
+          product: { ...otherProduct, status: 'unavailable' },
+          quantity: 2,
+        },
+      ],
+    });
   });
 
   it('ignores invalid stored data and keeps valid lines', () => {

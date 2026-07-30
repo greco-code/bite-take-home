@@ -1,8 +1,11 @@
 import {
   createOrderResponseSchema,
+  orderPreviewResponseSchema,
   orderResponseSchema,
   type CreateOrderRequest,
   type CreateOrderResponse,
+  type OrderPreviewResponse,
+  type PreviewOrderRequest,
   type OrderResponse,
 } from '@bite/contracts';
 
@@ -12,6 +15,17 @@ export const createOrder = (
   request: CreateOrderRequest,
 ): Promise<CreateOrderResponse> =>
   apiRequest('/v1/orders', createOrderResponseSchema, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+export const previewOrder = (
+  request: PreviewOrderRequest,
+): Promise<OrderPreviewResponse> =>
+  apiRequest('/v1/orders/preview', orderPreviewResponseSchema, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

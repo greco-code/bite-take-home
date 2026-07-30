@@ -1,1 +1,5 @@
-export { useProductQuery, useProductsQuery } from './use-product-queries';
+export {
+  useCartProductsQuery,
+  useProductQuery,
+  useProductsQuery,
+} from './use-product-queries';
