@@ -184,6 +184,30 @@
   line-height: 1.55;
 }
 
+.availabilityStatus {
+  margin: 1rem 0 0;
+  color: var(--color-accent-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.availabilityError {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1rem;
+
+  p {
+    margin: 0;
+    color: #ffd5cc;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  button {
+    justify-self: start;
+  }
+}
+
 @media (max-width: 56rem) {
   .layout {
     grid-template-columns: 1fr;

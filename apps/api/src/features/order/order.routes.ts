@@ -5,7 +5,9 @@ import {
   createOrderRequestSchema,
   createOrderResponseSchema,
   orderParamsSchema,
+  orderPreviewResponseSchema,
   orderResponseSchema,
+  previewOrderRequestSchema,
   receiptTokenSchema,
 } from '@bite/contracts';
 
@@ -13,6 +15,26 @@ import { type OrderService } from './order.service.js';
 
 export const createOrderRouter = (orderService: OrderService): Router => {
   const router = Router();
+
+  router.post('/preview', async (request, response) => {
+    const body = previewOrderRequestSchema.safeParse(request.body);
+
+    if (!body.success) {
+      response.status(400).json(
+        apiErrorResponseSchema.parse({
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'At least one valid cart line is required.',
+          },
+        }),
+      );
+      return;
+    }
+
+    const preview = await orderService.previewOrder(body.data);
+
+    response.json(orderPreviewResponseSchema.parse(preview));
+  });
 
   router.post('/', async (request, response) => {
     const body = createOrderRequestSchema.safeParse(request.body);
@@ -32,17 +54,29 @@ export const createOrderRouter = (orderService: OrderService): Router => {
 
     const result = await orderService.createOrder(body.data);
 
-    if (result.status === 'product-unavailable') {
+    if (result.status === 'review-required') {
       response.status(409).json(
         apiErrorResponseSchema.parse({
           error: {
-            code: 'PRODUCT_UNAVAILABLE',
+            code: 'ORDER_REVIEW_REQUIRED',
             message:
-              'One or more products are no longer available. Review your cart and try again.',
+              'Your order changed after it was reviewed. Review the latest items and total before trying again.',
           },
         }),
       );
 
+      return;
+    }
+
+    if (result.status === 'no-available-products') {
+      response.status(409).json(
+        apiErrorResponseSchema.parse({
+          error: {
+            code: 'PRODUCT_UNAVAILABLE',
+            message: 'None of the products in this cart are available.',
+          },
+        }),
+      );
       return;
     }
 

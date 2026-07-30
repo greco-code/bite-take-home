@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { createOrder, fetchOrder } from './order-api';
+import { createOrder, fetchOrder, previewOrder } from './order-api';
 
 const order = {
   id: 'fd150cbc-9737-43e7-80dd-2f6789839106',
@@ -25,7 +25,7 @@ describe('order API client', () => {
     vi.unstubAllEnvs();
   });
 
-  it('submits only product identifiers and quantities for checkout', async () => {
+  it('submits the reviewed cart for checkout', async () => {
     vi.stubEnv('NEXT_PUBLIC_API_URL', 'http://localhost:4000');
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ order, receiptToken }), {
@@ -37,6 +37,8 @@ describe('order API client', () => {
 
     await createOrder({
       lines: [{ productId: '1', quantity: 2 }],
+      reviewToken: 'b'.repeat(64),
+      acceptUnavailableExclusions: true,
     });
 
     expect(fetchMock).toHaveBeenCalledWith('http://localhost:4000/v1/orders', {
@@ -46,8 +48,52 @@ describe('order API client', () => {
       },
       body: JSON.stringify({
         lines: [{ productId: '1', quantity: 2 }],
+        reviewToken: 'b'.repeat(64),
+        acceptUnavailableExclusions: true,
       }),
     });
+  });
+
+  it('requests a live order preview', async () => {
+    vi.stubEnv('NEXT_PUBLIC_API_URL', 'http://localhost:4000');
+    const preview = {
+      lines: [
+        {
+          status: 'available',
+          position: 1,
+          productId: '1',
+          name: 'Maine Root-Cola',
+          unitPrice: 395,
+          quantity: 2,
+          lineTotal: 790,
+        },
+      ],
+      total: 790,
+      reviewToken: 'b'.repeat(64),
+    };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(preview), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      previewOrder({ lines: [{ productId: '1', quantity: 2 }] }),
+    ).resolves.toEqual(preview);
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://localhost:4000/v1/orders/preview',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          lines: [{ productId: '1', quantity: 2 }],
+        }),
+      },
+    );
   });
 
   it('sends the private receipt token in a header when retrieving an order', async () => {

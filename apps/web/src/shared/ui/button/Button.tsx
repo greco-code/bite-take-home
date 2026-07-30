@@ -1,4 +1,8 @@
-import { type ButtonHTMLAttributes, type ReactNode } from 'react';
+import {
+  type ButtonHTMLAttributes,
+  forwardRef,
+  type ReactNode,
+} from 'react';
 
 import { cn } from '@/shared/lib/cn';
 
@@ -12,21 +16,27 @@ type ButtonProps = Readonly<
   }
 >;
 
-export function Button({
-  children,
-  className,
-  size = 'default',
-  type = 'button',
-  variant = 'primary',
-  ...props
-}: ButtonProps) {
-  return (
-    <button
-      {...props}
-      className={cn(styles.button, styles[variant], styles[size], className)}
-      type={type}
-    >
-      {children}
-    </button>
-  );
-}
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  function Button(
+    {
+      children,
+      className,
+      size = 'default',
+      type = 'button',
+      variant = 'primary',
+      ...props
+    },
+    ref,
+  ) {
+    return (
+      <button
+        {...props}
+        className={cn(styles.button, styles[variant], styles[size], className)}
+        ref={ref}
+        type={type}
+      >
+        {children}
+      </button>
+    );
+  },
+);

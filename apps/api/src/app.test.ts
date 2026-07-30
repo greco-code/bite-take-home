@@ -15,6 +15,7 @@ const products: Product[] = [
     price: 395,
     imageUrl:
       'https://assets.admin.getabite.co/items/olo/6217611-1563923718946.jpg',
+    status: 'available',
   },
   {
     id: '2',
@@ -24,6 +25,7 @@ const products: Product[] = [
     price: 1125,
     imageUrl:
       'https://assets.admin.getabite.co/items/olo/7420856-1563923722357.jpg',
+    status: 'unavailable',
   },
 ];
 
@@ -55,10 +57,11 @@ const order: Order = {
   ],
 };
 const receiptToken = 'a'.repeat(43);
+const reviewToken = 'b'.repeat(64);
 const orderService: OrderService = {
   async createOrder(input) {
     if (input.lines.some((line) => line.productId === 'missing')) {
-      return { status: 'product-unavailable' };
+      return { status: 'review-required' };
     }
 
     return {
@@ -71,6 +74,39 @@ const orderService: OrderService = {
   },
   async findOrder(orderId, token) {
     return orderId === order.id && token === receiptToken ? order : null;
+  },
+  async previewOrder(input) {
+    const lines = input.lines.map((line, index) => {
+      const product = products.find((item) => item.id === line.productId);
+
+      if (!product || product.status === 'unavailable') {
+        return {
+          status: 'unavailable' as const,
+          position: index + 1,
+          productId: line.productId,
+        };
+      }
+
+      return {
+        status: 'available' as const,
+        position: index + 1,
+        productId: product.id,
+        name: product.name,
+        unitPrice: product.price,
+        quantity: line.quantity,
+        lineTotal: product.price * line.quantity,
+      };
+    });
+
+    return {
+      lines,
+      total: lines.reduce(
+        (total, line) =>
+          line.status === 'available' ? total + line.lineTotal : total,
+        0,
+      ),
+      reviewToken,
+    };
   },
 };
 
@@ -104,6 +140,8 @@ describe('Bite API', () => {
       .post('/v1/orders')
       .send({
         lines: [{ productId: '1', quantity: 2 }],
+        reviewToken,
+        acceptUnavailableExclusions: true,
       })
       .expect(201);
 
@@ -159,10 +197,43 @@ describe('Bite API', () => {
       .post('/v1/orders')
       .send({
         lines: [{ productId: 'missing', quantity: 1 }],
+        reviewToken,
+        acceptUnavailableExclusions: true,
       })
       .expect(409);
 
-    expect(response.body.error.code).toBe('PRODUCT_UNAVAILABLE');
+    expect(response.body.error.code).toBe('ORDER_REVIEW_REQUIRED');
+  });
+
+  it('previews available and unavailable cart lines', async () => {
+    const response = await request(app)
+      .post('/v1/orders/preview')
+      .send({
+        lines: [
+          { productId: '1', quantity: 2 },
+          { productId: '2', quantity: 1 },
+          { productId: 'missing', quantity: 1 },
+        ],
+      })
+      .expect(200);
+
+    expect(response.body).toEqual({
+      lines: [
+        {
+          status: 'available',
+          position: 1,
+          productId: '1',
+          name: 'Maine Root-Cola',
+          unitPrice: 395,
+          quantity: 2,
+          lineTotal: 790,
+        },
+        { status: 'unavailable', position: 2, productId: '2' },
+        { status: 'unavailable', position: 3, productId: 'missing' },
+      ],
+      total: 790,
+      reviewToken,
+    });
   });
 
   it('retrieves an order with its receipt token', async () => {
@@ -239,6 +310,7 @@ describe('Bite API', () => {
       '/v1/products/{productId}',
     );
     expect(openApiResponse.body.paths).toHaveProperty('/v1/orders');
+    expect(openApiResponse.body.paths).toHaveProperty('/v1/orders/preview');
     expect(openApiResponse.body.paths).toHaveProperty('/v1/orders/{orderId}');
     expect(docsResponse.text).toContain(
       '<title>Bite API documentation</title>',

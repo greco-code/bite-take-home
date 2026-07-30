@@ -13,6 +13,16 @@ export const useProductsQuery = (initialData: Product[] | undefined) =>
     initialData: () => initialData,
   });
 
+export const useCartProductsQuery = (enabled: boolean) =>
+  useQuery({
+    ...productListQueryOptions,
+    enabled,
+    refetchOnMount: 'always',
+    refetchOnReconnect: 'always',
+    refetchOnWindowFocus: 'always',
+    staleTime: 0,
+  });
+
 export const useProductQuery = (
   productId: string,
   initialData: Product | undefined,

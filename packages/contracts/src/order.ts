@@ -7,22 +7,82 @@ const quantitySchema = z.number().int().min(1).max(99).meta({
   example: 2,
 });
 
-export const createOrderRequestSchema = z
+const orderRequestLinesSchema = z
+  .array(
+    z.object({
+      productId: productIdSchema,
+      quantity: quantitySchema,
+    }),
+  )
+  .min(1)
+  .max(100);
+
+export const previewOrderRequestSchema = z
   .object({
-    lines: z
-      .array(
-        z.object({
-          productId: productIdSchema,
-          quantity: quantitySchema,
-        }),
-      )
-      .min(1)
-      .max(100),
+    lines: orderRequestLinesSchema,
+  })
+  .meta({
+    id: 'PreviewOrderRequest',
+    description: 'Distinct cart lines to validate and price before checkout.',
+  });
+
+export type PreviewOrderRequest = z.infer<typeof previewOrderRequestSchema>;
+
+export const orderReviewTokenSchema = z.string().regex(/^[a-f0-9]{64}$/).meta({
+  description:
+    'Opaque fingerprint of the exact product availability and pricing review.',
+});
+
+const availableOrderPreviewLineSchema = z.object({
+  status: z.literal('available'),
+  position: z.number().int().positive(),
+  productId: productIdSchema,
+  name: z.string().trim().min(1),
+  unitPrice: z.number().int().nonnegative(),
+  quantity: quantitySchema,
+  lineTotal: z.number().int().nonnegative(),
+});
+
+const unavailableOrderPreviewLineSchema = z.object({
+  status: z.literal('unavailable'),
+  position: z.number().int().positive(),
+  productId: productIdSchema,
+});
+
+export const orderPreviewLineSchema = z
+  .discriminatedUnion('status', [
+    availableOrderPreviewLineSchema,
+    unavailableOrderPreviewLineSchema,
+  ])
+  .meta({
+    id: 'OrderPreviewLine',
+  });
+
+export type OrderPreviewLine = z.infer<typeof orderPreviewLineSchema>;
+
+export const orderPreviewResponseSchema = z
+  .object({
+    lines: z.array(orderPreviewLineSchema).min(1),
+    total: z.number().int().nonnegative(),
+    reviewToken: orderReviewTokenSchema,
+  })
+  .meta({
+    id: 'OrderPreviewResponse',
+    description:
+      'Live availability and pricing review for a proposed anonymous order.',
+  });
+
+export type OrderPreviewResponse = z.infer<typeof orderPreviewResponseSchema>;
+
+export const createOrderRequestSchema = previewOrderRequestSchema
+  .extend({
+    reviewToken: orderReviewTokenSchema,
+    acceptUnavailableExclusions: z.literal(true),
   })
   .meta({
     id: 'CreateOrderRequest',
     description:
-      'Distinct cart lines to price and persist as a completed order.',
+      'Reviewed cart lines to persist, excluding products confirmed as unavailable.',
   });
 
 export type CreateOrderRequest = z.infer<typeof createOrderRequestSchema>;

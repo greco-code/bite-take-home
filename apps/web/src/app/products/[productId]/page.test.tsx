@@ -26,6 +26,7 @@ const product: Product = {
   description: 'A super taco salad.',
   price: 1125,
   imageUrl: 'https://example.com/taco-salad.jpg',
+  status: 'available',
 };
 
 describe('product page', () => {

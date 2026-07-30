@@ -14,6 +14,7 @@ const line: CartLine = {
     price: 395,
     imageUrl:
       'https://assets.admin.getabite.co/items/olo/6217611-1563923718946.jpg',
+    status: 'available',
   },
   quantity: 1,
 };

@@ -1,6 +1,7 @@
 [
   {
     "id": "1",
+    "status": "available",
     "description": "Classic pizza with fresh mozzarella and basil.",
     "name": "Maine Root-Cola",
     "price": 395,
@@ -8,6 +9,7 @@
   },
   {
     "id": "2",
+    "status": "available",
     "name": "Super Taco Salad (New!)",
     "description": "A super taco salad with black beans, corn, avocado, salsa, and tortilla strips.",
     "price": 1125,
@@ -15,6 +17,7 @@
   },
   {
     "id": "3",
+    "status": "available",
     "name": "Spindrift Raspberry",
     "description": "Sparkling water with real squeezed fruit.",
     "price": 325,
@@ -22,6 +25,7 @@
   },
   {
     "id": "4",
+    "status": "available",
     "name": "Maine Root-Root Beer",
     "description": "A classic root beer made with fair trade sugar.",
     "price": 395,
@@ -29,6 +33,7 @@
   },
   {
     "id": "5",
+    "status": "available",
     "name": "Chocolate Chip Cookie",
     "description": "THE classic chocolate chip cookie.",
     "price": 275,
@@ -36,6 +41,7 @@
   },
   {
     "id": "6",
+    "status": "available",
     "name": "Carrot Cake",
     "description": "A classic carrot cake with cream cheese frosting.",
     "price": 0,
@@ -43,6 +49,7 @@
   },
   {
     "id": "7",
+    "status": "available",
     "name": "The Beyond Burger",
     "description": "A plant-based burger with cheese, lettuce, tomato, and special sauce.",
     "price": 1295,
@@ -50,6 +57,7 @@
   },
   {
     "id": "8",
+    "status": "available",
     "name": "Mondo Nachos",
     "description": "A mondo plate of nachos with black beans, queso, salsa, and jalapenos.",
     "price": 795,
@@ -57,6 +65,7 @@
   },
   {
     "id": "9",
+    "status": "available",
     "name": "Quinoa Power Salad",
     "description": "A power salad with quinoa, arugula, and roasted vegetables.",
     "price": 1125,
@@ -64,6 +73,7 @@
   },
   {
     "id": "10",
+    "status": "available",
     "name": "Tempura Green Bean Stack",
     "description": "A stack of tempura green beans with sriracha mayo.",
     "price": 795,
@@ -71,6 +81,7 @@
   },
   {
     "id": "11",
+    "status": "available",
     "name": "Savory Kale Caesar",
     "description": "A savory kale caesar salad with parmesan and croutons.",
     "price": 1095,
@@ -78,6 +89,7 @@
   },
   {
     "id": "12",
+    "status": "available",
     "name": "Chill Out Wings",
     "description": "A plate of wings with a side of ranch.",
     "price": 795,
@@ -85,6 +97,7 @@
   },
   {
     "id": "13",
+    "status": "available",
     "name": "Gluten-Free Chocolate Brownie",
     "description": "A gluten-free chocolate brownie.",
     "price": 395,
@@ -92,6 +105,7 @@
   },
   {
     "id": "14",
+    "status": "available",
     "name": "Mediterranean Supergreens Salad",
     "description": "A super salad with arugula, quinoa, and roasted vegetables.",
     "price": 1125,
@@ -99,6 +113,7 @@
   },
   {
     "id": "15",
+    "status": "available",
     "name": "Oatmeal Cookie 410 Cal",
     "description": "A classic oatmeal cookie.",
     "price": 275,
@@ -106,6 +121,7 @@
   },
   {
     "id": "16",
+    "status": "available",
     "name": "Crispy Cauliflower",
     "description": "Crispy cauliflower with a side of ranch.",
     "price": 795,
@@ -113,6 +129,7 @@
   },
   {
     "id": "17",
+    "status": "available",
     "name": "Pellegrino",
     "description": "Sparkling water.",
     "price": 275,

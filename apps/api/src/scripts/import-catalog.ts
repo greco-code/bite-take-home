@@ -31,6 +31,7 @@ const importCatalog = async () => {
         price: sql`excluded.price_cents`,
         imageUrl: sql`excluded.image_url`,
         displayOrder: sql`excluded.display_order`,
+        status: sql`excluded.status`,
       },
     });
 
